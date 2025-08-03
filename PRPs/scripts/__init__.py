@@ -1,1 +1,0 @@
-# PRP scripts package initialization
