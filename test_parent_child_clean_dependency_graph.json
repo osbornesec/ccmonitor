@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "total_messages": 6,
+    "root_nodes": 2,
+    "max_depth": 5
+  },
+  "nodes": [
+    {
+      "uuid": "msg-001",
+      "type": "user",
+      "timestamp": "2025-01-01T10:00:00Z",
+      "content_preview": "Help me debug this error",
+      "importance_score": 0.0,
+      "children_count": 1,
+      "is_root": true,
+      "marked_for_deletion": true,
+      "deletion_blocked": true
+    },
+    {
+      "uuid": "msg-002",
+      "type": "assistant",
+      "timestamp": "2025-01-01T10:01:00Z",
+      "content_preview": "I can help! What's the error?",
+      "importance_score": 0.0,
+      "children_count": 1,
+      "is_root": false,
+      "marked_for_deletion": true,
+      "deletion_blocked": true
+    },
+    {
+      "uuid": "msg-003",
+      "type": "user",
+      "timestamp": "2025-01-01T10:02:00Z",
+      "content_preview": "TypeError: unsupported operand type(s)",
+      "importance_score": 0.0,
+      "children_count": 1,
+      "is_root": false,
+      "marked_for_deletion": true,
+      "deletion_blocked": true
+    },
+    {
+      "uuid": "msg-004",
+      "type": "assistant",
+      "timestamp": "2025-01-01T10:03:00Z",
+      "content_preview": "This error occurs when you try to perform operations on incompatible types",
+      "importance_score": 0.0,
+      "children_count": 1,
+      "is_root": false,
+      "marked_for_deletion": true,
+      "deletion_blocked": true
+    },
+    {
+      "uuid": "msg-005",
+      "type": "user",
+      "timestamp": "2025-08-03T10:00:00Z",
+      "content_preview": "Thanks, that's helpful!",
+      "importance_score": 0.0,
+      "children_count": 0,
+      "is_root": false,
+      "marked_for_deletion": false,
+      "deletion_blocked": false
+    },
+    {
+      "uuid": "msg-006",
+      "type": "system",
+      "timestamp": "2025-01-01T10:04:00Z",
+      "content_preview": "Session completed",
+      "importance_score": 0.0,
+      "children_count": 0,
+      "is_root": true,
+      "marked_for_deletion": true,
+      "deletion_blocked": false
+    }
+  ],
+  "edges": [
+    {
+      "parent": "msg-001",
+      "child": "msg-002"
+    },
+    {
+      "parent": "msg-002",
+      "child": "msg-003"
+    },
+    {
+      "parent": "msg-003",
+      "child": "msg-004"
+    },
+    {
+      "parent": "msg-004",
+      "child": "msg-005"
+    }
+  ]
+}

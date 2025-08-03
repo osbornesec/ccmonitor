@@ -1,0 +1,7 @@
+{"uuid":"ancient-root","type":"user","message":{"content":"Ancient conversation start"},"timestamp":"2024-12-01T10:00:00Z"}
+{"uuid":"ancient-child","type":"assistant","message":{"content":"Response to ancient"},"timestamp":"2024-12-01T10:01:00Z","parentUuid":"ancient-root"}
+{"uuid":"old-root","type":"user","message":{"content":"Old conversation"},"timestamp":"2025-01-01T10:00:00Z"}
+{"uuid":"old-child","type":"assistant","message":{"content":"Old response"},"timestamp":"2025-01-01T10:01:00Z","parentUuid":"old-root"}
+{"uuid":"recent-child","type":"user","message":{"content":"Recent message that depends on old parent"},"timestamp":"2025-08-03T10:00:00Z","parentUuid":"old-child"}
+{"uuid":"isolated-ancient","type":"system","message":{"content":"Ancient isolated message"},"timestamp":"2024-12-01T10:05:00Z"}
+{"uuid":"isolated-old","type":"system","message":{"content":"Old isolated message"},"timestamp":"2025-01-01T10:05:00Z"}

@@ -1,0 +1,6 @@
+{"uuid":"msg-001","type":"user","message":{"content":"Help me debug this Python error"},"timestamp":"2025-08-03T10:00:00Z"}
+{"uuid":"msg-002","type":"assistant","message":{"content":"I'd be happy to help debug your Python error. Could you please share the error message and the relevant code?"},"timestamp":"2025-08-03T10:00:30Z","parentUuid":"msg-001"}
+{"uuid":"msg-003","type":"user","message":{"content":"def calculate_sum(a, b):\n    return a + b\n\nresult = calculate_sum(5, '10')\nprint(result)"},"timestamp":"2025-08-03T10:01:00Z","parentUuid":"msg-002"}
+{"uuid":"msg-004","type":"assistant","message":{"content":"I can see the issue! You're trying to add an integer (5) and a string ('10'). Python can't directly add these different types. Here's the fix:\n\n```python\ndef calculate_sum(a, b):\n    return a + b\n\nresult = calculate_sum(5, 10)  # Both integers now\nprint(result)  # Will output: 15\n```"},"timestamp":"2025-08-03T10:01:30Z","parentUuid":"msg-003"}
+{"uuid":"msg-006","type":"system","message":{"content":"Hook system: Resource governor check passed"},"timestamp":"2025-08-03T10:01:32Z"}
+{"uuid":"msg-008","type":"assistant","message":{"content":"You're welcome! The key is ensuring data types match when performing operations. Type errors are common but easy to fix once you spot them."},"timestamp":"2025-08-03T10:02:30Z","parentUuid":"msg-007"}

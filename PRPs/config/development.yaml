@@ -1,0 +1,17 @@
+environment: development
+host: "0.0.0.0"
+port: 8001
+workers: 2
+max_agents: 10
+database_url: "PRPs/development.db"
+redis_url: null
+log_level: "DEBUG"
+cors_origins:
+  - "*"
+api_key_required: false
+model_versioning: true
+auto_scaling: false
+health_check_interval: 30
+metrics_retention_days: 7
+backup_enabled: true
+backup_interval_hours: 24

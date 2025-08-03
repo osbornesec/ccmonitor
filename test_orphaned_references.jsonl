@@ -1,0 +1,4 @@
+{"uuid":"msg-001","type":"user","message":{"content":"Start conversation"},"timestamp":"2025-01-01T10:00:00Z"}
+{"uuid":"msg-002","type":"assistant","message":{"content":"I'll help you"},"timestamp":"2025-01-01T10:01:00Z","parentUuid":"msg-001"}
+{"uuid":"msg-003","type":"user","message":{"content":"Great, let's continue"},"timestamp":"2025-08-03T10:00:00Z","parentUuid":"msg-002"}
+{"uuid":"msg-004","type":"system","message":{"content":"Session timeout"},"timestamp":"2025-01-01T10:05:00Z"}

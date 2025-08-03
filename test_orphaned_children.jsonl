@@ -1,0 +1,7 @@
+{"uuid":"root-1","type":"user","message":{"content":"Important conversation start"},"timestamp":"2025-08-03T10:00:00Z"}
+{"uuid":"child-1","type":"assistant","message":{"content":"Response to important conversation"},"timestamp":"2025-08-03T10:01:00Z","parentUuid":"root-1"}
+{"uuid":"old-root","type":"user","message":{"content":"Old conversation that will be deleted"},"timestamp":"2025-01-01T10:00:00Z"}
+{"uuid":"old-child-1","type":"assistant","message":{"content":"Child of old conversation"},"timestamp":"2025-01-01T10:01:00Z","parentUuid":"old-root"}
+{"uuid":"old-child-2","type":"user","message":{"content":"Another child that should be orphaned"},"timestamp":"2025-01-01T10:02:00Z","parentUuid":"old-root"}
+{"uuid":"old-grandchild","type":"assistant","message":{"content":"Grandchild that depends on old-child-1"},"timestamp":"2025-01-01T10:03:00Z","parentUuid":"old-child-1"}
+{"uuid":"isolated-old","type":"system","message":{"content":"Isolated old message"},"timestamp":"2025-01-01T10:04:00Z"}
