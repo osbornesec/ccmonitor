@@ -1,5 +1,5 @@
 [project]
-name = "claude-agents"
+name = "ccmonitor"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -26,4 +26,33 @@ dependencies = [
 ]
 
 [project.scripts]
-claude-prune = "src.cli.main:cli"
+ccmonitor = "src.cli.main:cli"
+
+[tool.black]
+line-length = 79
+target-version = ["py311"]
+skip-string-normalization = false
+preview = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.lint.pylint]
+max-statements = 30
+
+[tool.ruff.lint.mccabe]
+max-complexity = 5

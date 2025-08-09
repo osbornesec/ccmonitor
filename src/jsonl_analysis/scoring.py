@@ -121,7 +121,7 @@ class ImportanceScorer:
                 re.compile(r'\bhook\b:?\s*\w+', re.IGNORECASE),
                 re.compile(r'\[hook\]', re.IGNORECASE),
                 re.compile(r'\b(pre_tool|post_tool|context|memory|auto).*\b(hook|executed|completed)', re.IGNORECASE),
-                re.compile(r'\b(optimization|pruning|validation).*\b(hook|completed|executed)', re.IGNORECASE)
+                re.compile(r'\b(optimization|validation).*\b(hook|completed|executed)', re.IGNORECASE)
             ],
             
             # System validation patterns
@@ -596,7 +596,7 @@ class MessageScoreAnalyzer:
             Dictionary with conversation value metrics
         """
         if not messages:
-            return {"total_score": 0, "average_score": 0, "high_value_ratio": 0, "pruning_potential": 0}
+            return {"total_score": 0, "average_score": 0, "high_value_ratio": 0, "low_value_ratio": 0}
         
         # Build context if dependency scoring is enabled
         if include_dependencies and self.scorer.consider_dependencies:
@@ -610,7 +610,7 @@ class MessageScoreAnalyzer:
             "total_score": sum(scores),
             "average_score": sum(scores) / len(scores),
             "high_value_ratio": high_value_count / len(messages),
-            "pruning_potential": low_value_count / len(messages),
+            "low_value_ratio": low_value_count / len(messages),
             "score_statistics": {
                 "min": min(scores),
                 "max": max(scores),
@@ -630,41 +630,41 @@ class MessageScoreAnalyzer:
         
         return metrics
     
-    def recommend_pruning_threshold(self, messages: List[Dict[str, Any]], target_reduction: float = 0.5) -> Dict[str, Any]:
+    def recommend_analysis_threshold(self, messages: List[Dict[str, Any]], target_focus: float = 0.5) -> Dict[str, Any]:
         """
-        Recommend optimal pruning threshold to achieve target reduction
+        Recommend optimal analysis threshold to achieve target focus
         
         Args:
             messages: List of messages to analyze
-            target_reduction: Target percentage of messages to remove (0.0-1.0)
+            target_focus: Target percentage of messages to focus on (0.0-1.0)
             
         Returns:
             Dictionary with threshold recommendation
         """
         if not messages:
-            return {"threshold": 0, "predicted_reduction": 0, "preserved_messages": 0, "removed_messages": 0}
+            return {"threshold": 0, "predicted_focus": 0, "high_importance_messages": 0, "low_importance_messages": 0}
         
         # Calculate scores for all messages
         scores = [self.scorer.calculate_message_importance(msg) for msg in messages]
-        sorted_scores = sorted(scores)
+        sorted_scores = sorted(scores, reverse=True)
         
-        # Find threshold that achieves target reduction
-        target_remove_count = int(len(messages) * target_reduction)
-        if target_remove_count >= len(messages):
-            threshold = 100
-        elif target_remove_count == 0:
+        # Find threshold that achieves target focus
+        target_focus_count = int(len(messages) * target_focus)
+        if target_focus_count >= len(messages):
             threshold = 0
+        elif target_focus_count == 0:
+            threshold = 100
         else:
-            threshold = sorted_scores[target_remove_count]
+            threshold = sorted_scores[target_focus_count - 1]
         
-        # Calculate actual reduction with this threshold
-        removed_count = sum(1 for score in scores if score < threshold)
-        preserved_count = len(messages) - removed_count
-        actual_reduction = removed_count / len(messages) if messages else 0
+        # Calculate actual focus with this threshold
+        high_importance_count = sum(1 for score in scores if score >= threshold)
+        low_importance_count = len(messages) - high_importance_count
+        actual_focus = high_importance_count / len(messages) if messages else 0
         
         return {
             "threshold": threshold,
-            "predicted_reduction": actual_reduction,
-            "preserved_messages": preserved_count,
-            "removed_messages": removed_count
+            "predicted_focus": actual_focus,
+            "high_importance_messages": high_importance_count,
+            "low_importance_messages": low_importance_count
         }

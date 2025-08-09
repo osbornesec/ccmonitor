@@ -1,4 +1,0 @@
-{"uuid":"msg-001","type":"user","message":{"content":"Help me debug this error"},"timestamp":"2025-01-01T10:00:00Z"}
-{"uuid":"msg-002","type":"assistant","message":{"content":"I can help! What's the error?"},"timestamp":"2025-01-01T10:01:00Z","parentUuid":"msg-001"}
-{"uuid":"msg-003","type":"user","message":{"content":"TypeError: unsupported operand type(s)"},"timestamp":"2025-01-01T10:02:00Z","parentUuid":"msg-002"}
-{"uuid":"msg-004","type":"assistant","message":{"content":"This error occurs when you try to perform operations on incompatible types"},"timestamp":"2025-01-01T10:03:00Z","parentUuid":"msg-003"}

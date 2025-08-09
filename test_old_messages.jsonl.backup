@@ -1,5 +1,0 @@
-{"uuid": "msg-1", "type": "user", "timestamp": "2025-01-01T10:00:00Z", "message": {"content": "This is a very important architectural decision about our database schema"}}
-{"uuid": "msg-2", "type": "assistant", "timestamp": "2025-01-01T10:01:00Z", "message": {"content": "ERROR: Critical database connection failure - this is extremely important for debugging"}}
-{"uuid": "msg-3", "type": "user", "timestamp": "2025-01-01T10:02:00Z", "message": {"content": "Let me implement the fix for this critical error immediately"}}
-{"uuid": "msg-4", "type": "assistant", "timestamp": "2025-01-01T10:03:00Z", "message": {"content": "Solution: Here's the working fix that solved the database issue completely"}}
-{"uuid": "msg-5", "type": "system", "timestamp": "2025-08-03T15:00:00Z", "message": {"content": "Recent message that should be preserved"}}

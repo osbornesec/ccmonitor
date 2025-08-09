@@ -1,1 +1,1 @@
-# CLI package for claude-prune tool
+# CLI package for CCMonitor tool

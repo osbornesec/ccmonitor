@@ -320,7 +320,7 @@ class HookPatternDetector(BasePatternDetector):
             "hook_types": {
                 "pre_tool": re.compile(r'\bpre_tool\b', re.IGNORECASE),
                 "post_tool": re.compile(r'\bpost_tool\b', re.IGNORECASE),
-                "context": re.compile(r'\bcontext.*\b(prun|memory|optimization)\b', re.IGNORECASE),
+                "context": re.compile(r'\bcontext.*\b(memory|optimization)\b', re.IGNORECASE),
                 "security": re.compile(r'\bsecurity.*\b(hook|validator|validation)\b', re.IGNORECASE),
                 "optimization": re.compile(r'\b(memory|performance).*\b(optimization|optimizer)\b', re.IGNORECASE),
                 "automation": re.compile(r'\b(auto|automatic).*\b(commit|save|backup)\b', re.IGNORECASE)

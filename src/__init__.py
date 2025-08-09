@@ -1,1 +1,1 @@
-# JSONL Context Pruning System - Source Package
+# CCMonitor - JSONL Conversation Monitoring System - Source Package

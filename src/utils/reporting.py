@@ -100,7 +100,7 @@ class ValidationReporter:
     def generate_validation_report(
         self, 
         validation_results: Dict[str, Any],
-        operation_type: str = 'pruning',
+        operation_type: str = 'analysis',
         report_type: str = 'comprehensive'
     ) -> Dict[str, Any]:
         """
@@ -220,7 +220,7 @@ class ValidationReporter:
                 'detailed_breakdown': {
                     'level_0_pre_operation': self._format_level_result(report.detailed_results.get('level_0', {})),
                     'level_1_backup_integrity': self._format_level_result(report.detailed_results.get('level_1', {})),
-                    'level_2_pruning_integrity': self._format_level_result(report.detailed_results.get('level_2', {})),
+                    'level_2_analysis_integrity': self._format_level_result(report.detailed_results.get('level_2', {})),
                     'level_3_post_operation': self._format_level_result(report.detailed_results.get('level_3', {})),
                     'level_4_recovery_testing': self._format_level_result(report.detailed_results.get('level_4', {}))
                 }
@@ -330,7 +330,7 @@ class ValidationReporter:
             'data_preservation_rate': 1.0
         }
         
-        # Extract from level 2 results (pruning integrity)
+        # Extract from level 2 results (analysis integrity)
         level_2 = validation_results.get('level_2', {})
         if level_2:
             quality_metrics['false_positive_rate'] = level_2.get('false_positive_rate', 0.0)
@@ -1011,9 +1011,9 @@ class ErrorLogger:
                 ],
                 'priority': 'critical'
             },
-            'pruning_failure': {
+            'analysis_failure': {
                 'actions': [
-                    'Review pruning algorithm parameters',
+                    'Review analysis algorithm parameters',
                     'Check for data corruption in input',
                     'Verify memory and resource availability'
                 ],

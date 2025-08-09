@@ -1,8 +1,8 @@
 """
-Configuration module for JSONL conversation processing.
+Configuration module for JSONL conversation analysis and monitoring.
 
 This module provides configuration management for various components
-including temporal decay, pruning options, and processing parameters.
+including temporal decay, analysis options, and processing parameters.
 """
 
 from .temporal_config import (

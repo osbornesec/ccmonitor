@@ -1,0 +1,80 @@
+[project]
+name = "claude-python-hooks"
+version = "2.0.0"
+description = "Claude Code hooks for enforcing Python code quality standards"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+claude-hook-pre-tool-use = "hooks.pre_tool_use:main"
+claude-hook-post-tool-use = "hooks.post_tool_use:main"
+claude-hook-user-prompt-submit = "hooks.user_prompt_submit:main"
+claude-hook-session-start = "hooks.session_start:main"
+claude-hook-stop = "hooks.stop:main"
+claude-hook-notification = "hooks.notification:main"
+claude-hook-quality-gate = "quality_gate:main"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+    "black>=23.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Black configuration - Enterprise Grade Strictest Settings
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+force-exclude = '''
+/(
+  # files
+  .*\.pyx
+  | .*_pb2\.py
+  | .*_pb2_grpc\.py
+)/
+'''
+
+# Ruff configuration - Use dedicated ruff.toml for comprehensive settings
+[tool.ruff] 
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["ALL"]  # Enable all available rules
+ignore = [
+    # Only ignore absolutely necessary rules for hook functionality
+    "S603", "S607",  # subprocess calls expected in hooks
+    "T201",          # print allowed in CLI scripts
+]
+
+# MyPy basic configuration - use mypy.ini for comprehensive settings
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["hooks", "quality_gate.py"]
