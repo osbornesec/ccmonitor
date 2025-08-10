@@ -41,26 +41,34 @@ class ErrorContext:
 class CCMonitorError(Exception):
     """Base exception class for CCMonitor with enhanced error information."""
 
-    def __init__(self, message: str, **kwargs: Any) -> None:
+    def __init__(  # noqa: PLR0913
+        self,
+        message: str,
+        *,
+        category: ErrorCategory = ErrorCategory.SYSTEM,
+        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
+        context: ErrorContext | None = None,
+        cause: Exception | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
         """Initialize CCMonitor base exception.
 
         Args:
             message: Error message
-            **kwargs: Optional error details including:
-                - category: Error category (default: ErrorCategory.SYSTEM)
-                - severity: Error severity level (default: ErrorSeverity.MEDIUM)
-                - context: Additional error context (default: None)
-                - cause: Underlying cause exception (default: None)
-                - suggestions: List of suggested solutions (default: empty list)
+            category: Error category (default: ErrorCategory.SYSTEM)
+            severity: Error severity level (default: ErrorSeverity.MEDIUM)
+            context: Additional error context (default: None)
+            cause: Underlying cause exception (default: None)
+            suggestions: List of suggested solutions (default: empty list)
 
         """
         super().__init__(message)
         self.message = message
-        self.category = kwargs.get("category", ErrorCategory.SYSTEM)
-        self.severity = kwargs.get("severity", ErrorSeverity.MEDIUM)
-        self.context = kwargs.get("context")
-        self.cause = kwargs.get("cause")
-        self.suggestions = kwargs.get("suggestions") or []
+        self.category = category
+        self.severity = severity
+        self.context = context
+        self.cause = cause
+        self.suggestions = suggestions or []
 
     def __str__(self) -> str:
         """Enhanced string representation with context."""
@@ -182,7 +190,9 @@ class ConversationFlowError(ValidationError):
         context = ErrorContext(
             operation="Conversation flow validation",
             additional_info=(
-                {"problematic_uuids": problematic_uuids} if problematic_uuids else None
+                {"problematic_uuids": problematic_uuids}
+                if problematic_uuids
+                else None
             ),
         )
         suggestions = [
@@ -377,7 +387,10 @@ class InvalidConfigurationError(ConfigurationError):
     """Raised when configuration is invalid."""
 
     def __init__(
-        self, config_key: str, value: object, expected_type: str,
+        self,
+        config_key: str,
+        value: object,
+        expected_type: str,
     ) -> None:
         """Initialize invalid configuration error."""
         suggestions = [
@@ -427,7 +440,9 @@ class UserInputError(CCMonitorError):
         """Initialize user input error."""
         context = ErrorContext(
             operation="User input validation",
-            additional_info=({"input_value": input_value} if input_value else None),
+            additional_info=(
+                {"input_value": input_value} if input_value else None
+            ),
         )
         super().__init__(
             message=message,
