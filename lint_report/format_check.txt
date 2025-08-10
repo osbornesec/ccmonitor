@@ -1,0 +1,12 @@
+Would reformat: src/cli/batch.py
+Would reformat: src/cli/config.py
+Would reformat: src/cli/main.py
+Would reformat: src/cli/reporting.py
+Would reformat: src/cli/utils.py
+Would reformat: src/common/exceptions.py
+Would reformat: src/jsonl_analysis/analyzer.py
+Would reformat: src/jsonl_analysis/analyzer_refactored.py
+Would reformat: src/jsonl_analysis/patterns.py
+Would reformat: src/jsonl_analysis/scoring.py
+Would reformat: src/utils/reporting.py
+11 files would be reformatted, 11 files already formatted

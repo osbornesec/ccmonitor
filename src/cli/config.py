@@ -5,11 +5,12 @@ Configuration system with profiles and environment integration.
 
 import json
 import os
-import yaml
 from contextlib import suppress
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 
 @dataclass
@@ -45,7 +46,7 @@ class CLIConfig:
     schedule_enabled: bool = False
     schedule_policy: str = "weekly"
     schedule_level: str = "light"
-    schedule_directories: list = None
+    schedule_directories: list[str] | None = None
 
     def __post_init__(self) -> None:
         """Initialize default values for mutable fields."""
@@ -59,7 +60,7 @@ class ConfigManager:
     def __init__(self) -> None:
         """Initialize configuration manager."""
         self.config = CLIConfig()
-        self.config_file = None
+        self.config_file: Path | None = None
         self._load_default_config()
 
     def _load_default_config(self) -> None:
@@ -165,7 +166,9 @@ class ConfigManager:
         return env_overrides
 
     def _convert_env_value(
-        self, value: str, config_key: str
+        self,
+        value: str,
+        config_key: str,
     ) -> str | int | bool:
         """Convert environment variable string to appropriate type."""
         # Boolean conversions
@@ -251,7 +254,9 @@ class ConfigManager:
         """Get current configuration as dictionary."""
         return asdict(self.config)
 
-    def set_config_value(self, key: str, value: str | int | bool) -> None:
+    def set_config_value(
+        self, key: str, *, value: str | int | bool,
+    ) -> None:
         """Set configuration value.
 
         Args:
@@ -280,8 +285,11 @@ class ConfigManager:
         setattr(self.config, key, value)
 
     def get_config_value(
-        self, key: str, default: str | int | bool = None
-    ) -> str | int | bool:
+        self,
+        key: str,
+        *,
+        default: str | int | bool | None = None,
+    ) -> str | int | bool | None:
         """Get configuration value.
 
         Args:
@@ -370,7 +378,7 @@ class ConfigManager:
             return []
 
         return sorted(
-            [profile_file.stem for profile_file in profile_dir.glob("*.yaml")]
+            [profile_file.stem for profile_file in profile_dir.glob("*.yaml")],
         )
 
     def validate_config(self) -> list[str]:
@@ -381,59 +389,68 @@ class ConfigManager:
 
         """
         errors = []
-        max_workers = 16
-        min_memory = 64
 
-        # Validate analysis level
-        if self.config.default_level not in ["light", "medium", "aggressive"]:
-            errors.append(
-                f"Invalid default_level: {self.config.default_level}"
-            )
-
-        # Validate parallel workers
-        if (
-            self.config.default_parallel_workers < 1
-            or self.config.default_parallel_workers > max_workers
-        ):
-            errors.append(
-                f"Invalid default_parallel_workers: {self.config.default_parallel_workers}",
-            )
-
-        # Validate output format
-        if self.config.default_output_format not in [
-            "table",
-            "json",
-            "csv",
-            "html",
-        ]:
-            errors.append(
-                f"Invalid default_output_format: {self.config.default_output_format}",
-            )
-
-        # Validate memory limits
-        if self.config.memory_limit_mb < min_memory:
-            errors.append(
-                f"Memory limit too low: {self.config.memory_limit_mb}MB"
-            )
-
-        if self.config.max_file_size_mb < 1:
-            errors.append(
-                f"Max file size too low: {self.config.max_file_size_mb}MB"
-            )
-
-        # Validate retention days
-        if self.config.backup_retention_days < 1:
-            errors.append(
-                f"Invalid backup retention: {self.config.backup_retention_days} days",
-            )
-
-        # Validate schedule policy
-        if self.config.schedule_policy not in ["daily", "weekly", "monthly"]:
-            errors.append(
-                f"Invalid schedule_policy: {self.config.schedule_policy}"
-            )
+        errors.extend(self._validate_analysis_level())
+        errors.extend(self._validate_parallel_workers())
+        errors.extend(self._validate_output_format())
+        errors.extend(self._validate_memory_limits())
+        errors.extend(self._validate_retention_policy())
+        errors.extend(self._validate_schedule_policy())
 
         return errors
+
+    def _validate_analysis_level(self) -> list[str]:
+        """Validate analysis level setting."""
+        valid_levels = ["light", "medium", "aggressive"]
+        if self.config.default_level not in valid_levels:
+            return [f"Invalid default_level: {self.config.default_level}"]
+        return []
+
+    def _validate_parallel_workers(self) -> list[str]:
+        """Validate parallel workers setting."""
+        max_workers = 16
+        workers = self.config.default_parallel_workers
+
+        if workers < 1 or workers > max_workers:
+            return [f"Invalid default_parallel_workers: {workers}"]
+        return []
+
+    def _validate_output_format(self) -> list[str]:
+        """Validate output format setting."""
+        valid_formats = ["table", "json", "csv", "html"]
+        if self.config.default_output_format not in valid_formats:
+            return [
+                f"Invalid default_output_format: {self.config.default_output_format}",
+            ]
+        return []
+
+    def _validate_memory_limits(self) -> list[str]:
+        """Validate memory limit settings."""
+        errors = []
+        min_memory = 64
+
+        if self.config.memory_limit_mb < min_memory:
+            errors.append(f"Memory limit too low: {self.config.memory_limit_mb}MB")
+
+        if self.config.max_file_size_mb < 1:
+            errors.append(f"Max file size too low: {self.config.max_file_size_mb}MB")
+
+        return errors
+
+    def _validate_retention_policy(self) -> list[str]:
+        """Validate backup retention policy."""
+        if self.config.backup_retention_days < 1:
+            return [
+                f"Invalid backup retention: {self.config.backup_retention_days} days",
+            ]
+        return []
+
+    def _validate_schedule_policy(self) -> list[str]:
+        """Validate schedule policy setting."""
+        valid_policies = ["daily", "weekly", "monthly"]
+        if self.config.schedule_policy not in valid_policies:
+            return [f"Invalid schedule_policy: {self.config.schedule_policy}"]
+        return []
 
     def get_effective_config(
         self,

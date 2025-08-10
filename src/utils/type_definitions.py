@@ -14,28 +14,20 @@ from typing import (
     Generic,
     Literal,
     Protocol,
-    TypeVar,
     TypedDict,
-    Union,
+    TypeVar,
 )
 
 # Type aliases for better readability
 UUID = str
-FilePath = Union[str, Path]
-JSONValue = Union[str, int, float, bool, None, dict[str, Any], list[Any]]
+FilePath = str | Path
+JSONValue = str | int | float | bool | None | dict[str, Any] | list[Any]
 MessageContent = dict[str, Any]
 ProcessingStatistics = dict[str, int | float | str]
 
 # Literal types for constrained values
 MessageType = Literal["user", "assistant", "tool_call", "system"]
 OutputFormat = Literal["table", "json", "csv", "html"]
-DecayMode = Literal[
-    "none",
-    "simple",
-    "multi_stage",
-    "content_aware",
-    "adaptive",
-]
 
 
 # TypedDict for structured dictionaries
@@ -92,6 +84,12 @@ class DependencyGraphDict(TypedDict):
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+
+# Variance-specific type variables for protocols
+T_contra = TypeVar("T_contra", contravariant=True)
+T_co = TypeVar("T_co", covariant=True)
+ResultType_co = TypeVar("ResultType_co", covariant=True)
+ConfigType_contra = TypeVar("ConfigType_contra", contravariant=True)
 
 ResultType = TypeVar("ResultType")
 ConfigType = TypeVar("ConfigType")
@@ -158,7 +156,8 @@ ErrorHandler = Callable[[Exception], None]
 # Async function types
 AsyncMessageProcessor = Callable[[MessageDict], Awaitable[MessageDict]]
 AsyncBatchProcessor = Callable[
-    [list[MessageDict]], Awaitable[list[MessageDict]]
+    [list[MessageDict]],
+    Awaitable[list[MessageDict]],
 ]
 
 
@@ -196,9 +195,7 @@ class Result(Generic[T]):
 
     def unwrap_or(self, default: T) -> T:
         """Unwrap value or return default."""
-        return (
-            self.value if self.success and self.value is not None else default
-        )
+        return self.value if self.success and self.value is not None else default
 
 
 # Configuration types with constraints
@@ -207,7 +204,6 @@ class ProcessingConfiguration:
     """Type-safe processing configuration."""
 
     importance_threshold: int
-    temporal_decay_enabled: bool = False
     backup_enabled: bool = True
     compression_enabled: bool = True
     max_memory_mb: int = 1024
@@ -217,7 +213,10 @@ class ProcessingConfiguration:
         """Validate configuration values."""
         threshold_min, threshold_max = 0, 100
         if not threshold_min <= self.importance_threshold <= threshold_max:
-            msg = f"Importance threshold must be between {threshold_min} and {threshold_max}"
+            msg = (
+                f"Importance threshold must be between {threshold_min} and "
+                f"{threshold_max}"
+            )
             raise ValueError(msg)
 
         min_memory = 64
@@ -266,26 +265,26 @@ class Repository(Protocol, Generic[T, K]):
         ...
 
 
-class Strategy(Protocol, Generic[T, ResultType]):
+class Strategy(Protocol, Generic[T_contra, ResultType_co]):
     """Generic strategy pattern protocol."""
 
-    def execute(self, input_data: T) -> ResultType:
+    def execute(self, input_data: T_contra) -> ResultType_co:
         """Execute strategy with input data."""
         ...
 
-    def can_handle(self, input_data: T) -> bool:
+    def can_handle(self, input_data: T_contra) -> bool:
         """Check if strategy can handle input."""
         ...
 
 
-class Factory(Protocol, Generic[T, ConfigType]):
+class Factory(Protocol, Generic[T_co, ConfigType_contra]):
     """Generic factory pattern protocol."""
 
-    def create(self, config: ConfigType) -> T:
+    def create(self, config: ConfigType_contra) -> T_co:
         """Create instance with configuration."""
         ...
 
-    def supports(self, config: ConfigType) -> bool:
+    def supports(self, config: ConfigType_contra) -> bool:
         """Check if factory supports configuration."""
         ...
 
@@ -314,16 +313,9 @@ class BatchProcessingResult(TypedDict):
 
 
 # Union types for flexibility
-MessageIdentifier = Union[str, int]  # UUID or index
-ProcessingInput = Union[
-    FilePath,
-    list[MessageDict],
-    str,
-]  # File, messages, or JSON string
-ProcessingOutput = Union[
-    FilePath,
-    list[MessageDict],
-]  # File or in-memory result
+MessageIdentifier = str | int  # UUID or index
+ProcessingInput = FilePath | list[MessageDict] | str  # File, messages, or JSON string
+ProcessingOutput = FilePath | list[MessageDict]  # File or in-memory result
 
 # Constants with proper typing
 SUPPORTED_MESSAGE_TYPES: Final[set[MessageType]] = {
@@ -361,7 +353,7 @@ def is_processing_result(obj: object) -> bool:
     return (
         isinstance(obj, dict)
         and required_keys.issubset(obj.keys())
-        and all(isinstance(obj[key], (int, float)) for key in required_keys)
+        and all(isinstance(obj[key], int | float) for key in required_keys)
     )
 
 
@@ -419,6 +411,11 @@ ConfigurationValidator = Callable[
 
 # Export all public types
 __all__ = [
+    "DEFAULT_CHUNK_SIZE",
+    "DEFAULT_TIMEOUT_SECONDS",
+    "MAX_MESSAGE_SIZE",
+    "SUPPORTED_MESSAGE_TYPES",
+    "UUID",
     # Basic type aliases
     "AsyncBatchProcessor",
     "AsyncMessageProcessor",
@@ -429,9 +426,6 @@ __all__ = [
     "ConfigurationValidator",
     "ConversationAnalysisResult",
     "ConversationGraphNode",
-    "DEFAULT_CHUNK_SIZE",
-    "DEFAULT_TIMEOUT_SECONDS",
-    "DecayMode",
     "DependencyGraphDict",
     "ErrorHandler",
     "Factory",
@@ -439,7 +433,6 @@ __all__ = [
     "ImportanceCalculator",
     "JSONValue",
     "K",
-    "MAX_MESSAGE_SIZE",
     "MessageContent",
     "MessageDict",
     "MessageIdentifier",
@@ -460,12 +453,10 @@ __all__ = [
     "Repository",
     "Result",
     "ResultType",
-    "SUPPORTED_MESSAGE_TYPES",
     "Serializable",
     "Strategy",
     "T",
     "ToolCallMessage",
-    "UUID",
     "V",
     "Validatable",
     "create_empty_statistics",

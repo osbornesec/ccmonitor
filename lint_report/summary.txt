@@ -1,0 +1,27 @@
+=== COMPREHENSIVE PYTHON LINTING SUMMARY ===
+
+OVERVIEW:
+----------------------------------------
+Total files analyzed: 1
+Total issues: 1
+  - Ruff warnings: 1
+  - MyPy errors: 0
+  - MyPy warnings: 0
+
+PRIORITY BREAKDOWN:
+----------------------------------------
+  Medium (Quality): 1
+
+FIX DIFFICULTY:
+----------------------------------------
+  Manual fixes: 1
+
+TOP 15 ERROR CODES:
+----------------------------------------
+  ANN401                                  1 (quality)
+
+FILES NEEDING ATTENTION:
+--------------------------------------------------------------------------------
+File                                                   Ruff   MyPy Err  MyPy Warn    Total
+--------------------------------------------------------------------------------
+src/common/exceptions.py                                  1          0          0        1

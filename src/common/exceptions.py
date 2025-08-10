@@ -1,15 +1,15 @@
-"""
-Comprehensive exception hierarchy for clean error handling
-Following clean code principles for error management
+"""Comprehensive exception hierarchy for clean error handling.
+
+Following clean code principles for error management.
 """
 
-from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 
 class ErrorSeverity(Enum):
-    """Error severity levels"""
+    """Error severity levels."""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -18,7 +18,7 @@ class ErrorSeverity(Enum):
 
 
 class ErrorCategory(Enum):
-    """Error categories for better classification"""
+    """Error categories for better classification."""
 
     VALIDATION = "validation"
     IO_OPERATION = "io_operation"
@@ -30,52 +30,55 @@ class ErrorCategory(Enum):
 
 @dataclass(frozen=True)
 class ErrorContext:
-    """Immutable error context information"""
+    """Immutable error context information."""
 
     operation: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    additional_info: Optional[Dict[str, Any]] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    additional_info: dict[str, Any] | None = None
 
 
 class CCMonitorError(Exception):
-    """Base exception class for CCMonitor with enhanced error information"""
+    """Base exception class for CCMonitor with enhanced error information."""
 
-    def __init__(
-        self,
-        message: str,
-        category: ErrorCategory = ErrorCategory.SYSTEM,
-        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-        context: Optional[ErrorContext] = None,
-        cause: Optional[Exception] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+    def __init__(self, message: str, **kwargs: Any) -> None:
+        """Initialize CCMonitor base exception.
+
+        Args:
+            message: Error message
+            **kwargs: Optional error details including:
+                - category: Error category (default: ErrorCategory.SYSTEM)
+                - severity: Error severity level (default: ErrorSeverity.MEDIUM)
+                - context: Additional error context (default: None)
+                - cause: Underlying cause exception (default: None)
+                - suggestions: List of suggested solutions (default: empty list)
+
+        """
         super().__init__(message)
         self.message = message
-        self.category = category
-        self.severity = severity
-        self.context = context
-        self.cause = cause
-        self.suggestions = suggestions or []
+        self.category = kwargs.get("category", ErrorCategory.SYSTEM)
+        self.severity = kwargs.get("severity", ErrorSeverity.MEDIUM)
+        self.context = kwargs.get("context")
+        self.cause = kwargs.get("cause")
+        self.suggestions = kwargs.get("suggestions") or []
 
     def __str__(self) -> str:
-        """Enhanced string representation with context"""
+        """Enhanced string representation with context."""
         result = f"[{self.category.value.upper()}] {self.message}"
 
-        if self.context:
-            if self.context.file_path:
-                result += f" (File: {self.context.file_path}"
-                if self.context.line_number:
-                    result += f", Line: {self.context.line_number}"
-                result += ")"
+        if self.context and self.context.file_path:
+            result += f" (File: {self.context.file_path}"
+            if self.context.line_number:
+                result += f", Line: {self.context.line_number}"
+            result += ")"
 
         if self.cause:
-            result += f" | Caused by: {str(self.cause)}"
+            result += f" | Caused by: {self.cause!s}"
 
         return result
 
     def get_user_friendly_message(self) -> str:
-        """Get user-friendly error message with suggestions"""
+        """Get user-friendly error message with suggestions."""
         message = self.message
 
         if self.suggestions:
@@ -90,14 +93,15 @@ class CCMonitorError(Exception):
 
 
 class ValidationError(CCMonitorError):
-    """Base class for validation errors"""
+    """Base class for validation errors."""
 
     def __init__(
         self,
         message: str,
-        context: Optional[ErrorContext] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        context: ErrorContext | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize validation error."""
         super().__init__(
             message=message,
             category=ErrorCategory.VALIDATION,
@@ -108,14 +112,15 @@ class ValidationError(CCMonitorError):
 
 
 class InvalidJSONLError(ValidationError):
-    """Raised when JSONL file structure is invalid"""
+    """Raised when JSONL file structure is invalid."""
 
     def __init__(
         self,
         message: str,
-        file_path: Optional[str] = None,
-        line_number: Optional[int] = None,
-    ):
+        file_path: str | None = None,
+        line_number: int | None = None,
+    ) -> None:
+        """Initialize JSONL structure error."""
         context = ErrorContext(
             operation="JSONL validation",
             file_path=file_path,
@@ -130,14 +135,22 @@ class InvalidJSONLError(ValidationError):
 
 
 class MalformedEntryError(ValidationError):
-    """Raised when an individual entry is malformed"""
+    """Raised when an individual entry is malformed."""
 
     def __init__(
         self,
         message: str,
-        entry_data: Optional[Dict[str, Any]] = None,
-        line_number: Optional[int] = None,
-    ):
+        entry_data: dict[str, Any] | None = None,
+        line_number: int | None = None,
+    ) -> None:
+        """Initialize malformed entry error.
+
+        Args:
+            message: Error message
+            entry_data: Data that caused the error
+            line_number: Line number where error occurred
+
+        """
         context = ErrorContext(
             operation="Entry validation",
             line_number=line_number,
@@ -152,17 +165,24 @@ class MalformedEntryError(ValidationError):
 
 
 class ConversationFlowError(ValidationError):
-    """Raised when conversation flow is invalid"""
+    """Raised when conversation flow is invalid."""
 
     def __init__(
-        self, message: str, problematic_uuids: Optional[List[str]] = None
-    ):
+        self,
+        message: str,
+        problematic_uuids: list[str] | None = None,
+    ) -> None:
+        """Initialize conversation flow error.
+
+        Args:
+            message: Error message
+            problematic_uuids: UUIDs that caused the flow error
+
+        """
         context = ErrorContext(
             operation="Conversation flow validation",
             additional_info=(
-                {"problematic_uuids": problematic_uuids}
-                if problematic_uuids
-                else None
+                {"problematic_uuids": problematic_uuids} if problematic_uuids else None
             ),
         )
         suggestions = [
@@ -177,15 +197,24 @@ class ConversationFlowError(ValidationError):
 
 
 class IOOperationError(CCMonitorError):
-    """Base class for IO operation errors"""
+    """Base class for IO operation errors."""
 
     def __init__(
         self,
         message: str,
-        file_path: Optional[str] = None,
-        cause: Optional[Exception] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        file_path: str | None = None,
+        cause: Exception | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize IO operation error.
+
+        Args:
+            message: Error message
+            file_path: File path that caused the error
+            cause: Underlying cause exception
+            suggestions: Suggested solutions
+
+        """
         context = ErrorContext(operation="File operation", file_path=file_path)
         super().__init__(
             message=message,
@@ -197,10 +226,11 @@ class IOOperationError(CCMonitorError):
         )
 
 
-class FileNotFoundError(IOOperationError):
-    """Raised when a required file is not found"""
+class CCMonitorFileNotFoundError(IOOperationError):
+    """Raised when a required file is not found."""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str) -> None:
+        """Initialize file not found error."""
         suggestions = [
             f"Verify the file path is correct: {file_path}",
             "Check file permissions and access rights",
@@ -214,9 +244,10 @@ class FileNotFoundError(IOOperationError):
 
 
 class FilePermissionError(IOOperationError):
-    """Raised when file permissions are insufficient"""
+    """Raised when file permissions are insufficient."""
 
-    def __init__(self, file_path: str, operation: str):
+    def __init__(self, file_path: str, operation: str) -> None:
+        """Initialize file permission error."""
         suggestions = [
             f"Check read/write permissions for: {file_path}",
             "Run with appropriate user privileges",
@@ -230,9 +261,10 @@ class FilePermissionError(IOOperationError):
 
 
 class DiskSpaceError(IOOperationError):
-    """Raised when there's insufficient disk space"""
+    """Raised when there's insufficient disk space."""
 
-    def __init__(self, required_space: Optional[int] = None):
+    def __init__(self, required_space: int | None = None) -> None:
+        """Initialize insufficient disk space error."""
         suggestions = [
             "Free up disk space on the target drive",
             "Choose a different output location with more space",
@@ -242,22 +274,23 @@ class DiskSpaceError(IOOperationError):
         if required_space:
             message += f" (required: {required_space} bytes)"
 
-        super().__init__(message=message, suggestions=suggestions)
+        super().__init__(message, suggestions=suggestions)
 
 
 # Processing Errors
 
 
 class ProcessingError(CCMonitorError):
-    """Base class for processing errors"""
+    """Base class for processing errors."""
 
     def __init__(
         self,
         message: str,
         operation: str,
-        cause: Optional[Exception] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        cause: Exception | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize processing error."""
         context = ErrorContext(operation=operation)
         super().__init__(
             message=message,
@@ -270,9 +303,10 @@ class ProcessingError(CCMonitorError):
 
 
 class CompressionError(ProcessingError):
-    """Raised when compression operation fails"""
+    """Raised when compression operation fails."""
 
-    def __init__(self, message: str, cause: Optional[Exception] = None):
+    def __init__(self, message: str, cause: Exception | None = None) -> None:
+        """Initialize compression error."""
         suggestions = [
             "Disable compression and try again",
             "Check message content for unusual characters",
@@ -287,12 +321,15 @@ class CompressionError(ProcessingError):
 
 
 class ConversationIntegrityError(ProcessingError):
-    """Raised when conversation integrity is compromised"""
+    """Raised when conversation integrity is compromised."""
 
     def __init__(
-        self, message: str, missing_uuids: Optional[List[str]] = None
-    ):
-        context = ErrorContext(
+        self,
+        message: str,
+        missing_uuids: list[str] | None = None,
+    ) -> None:
+        """Initialize conversation integrity error."""
+        ErrorContext(
             operation="Conversation integrity check",
             additional_info=(
                 {"missing_uuids": missing_uuids} if missing_uuids else None
@@ -314,14 +351,15 @@ class ConversationIntegrityError(ProcessingError):
 
 
 class ConfigurationError(CCMonitorError):
-    """Base class for configuration errors"""
+    """Base class for configuration errors."""
 
     def __init__(
         self,
         message: str,
-        config_key: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        config_key: str | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize configuration error."""
         context = ErrorContext(
             operation="Configuration validation",
             additional_info={"config_key": config_key} if config_key else None,
@@ -336,25 +374,32 @@ class ConfigurationError(CCMonitorError):
 
 
 class InvalidConfigurationError(ConfigurationError):
-    """Raised when configuration is invalid"""
+    """Raised when configuration is invalid."""
 
-    def __init__(self, config_key: str, value: Any, expected_type: str):
+    def __init__(
+        self, config_key: str, value: object, expected_type: str,
+    ) -> None:
+        """Initialize invalid configuration error."""
         suggestions = [
             f"Set {config_key} to a valid {expected_type}",
             "Check configuration file syntax",
             "Use default configuration values",
         ]
         super().__init__(
-            message=f"Invalid configuration for '{config_key}': expected {expected_type}, got {type(value).__name__}",
+            message=(
+                f"Invalid configuration for '{config_key}': "
+                f"expected {expected_type}, got {type(value).__name__}"
+            ),
             config_key=config_key,
             suggestions=suggestions,
         )
 
 
 class MissingConfigurationError(ConfigurationError):
-    """Raised when required configuration is missing"""
+    """Raised when required configuration is missing."""
 
-    def __init__(self, config_key: str):
+    def __init__(self, config_key: str) -> None:
+        """Initialize missing configuration error."""
         suggestions = [
             f"Add required configuration key: {config_key}",
             "Use configuration template",
@@ -371,19 +416,18 @@ class MissingConfigurationError(ConfigurationError):
 
 
 class UserInputError(CCMonitorError):
-    """Base class for user input errors"""
+    """Base class for user input errors."""
 
     def __init__(
         self,
         message: str,
-        input_value: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        input_value: str | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize user input error."""
         context = ErrorContext(
             operation="User input validation",
-            additional_info=(
-                {"input_value": input_value} if input_value else None
-            ),
+            additional_info=({"input_value": input_value} if input_value else None),
         )
         super().__init__(
             message=message,
@@ -395,9 +439,10 @@ class UserInputError(CCMonitorError):
 
 
 class InvalidFilePathError(UserInputError):
-    """Raised when an invalid file path is provided"""
+    """Raised when an invalid file path is provided."""
 
-    def __init__(self, file_path: str, reason: str):
+    def __init__(self, file_path: str, reason: str) -> None:
+        """Initialize invalid file path error."""
         suggestions = [
             "Use absolute file paths when possible",
             "Check file path for special characters",
@@ -413,15 +458,16 @@ class InvalidFilePathError(UserInputError):
 # System Errors
 
 
-class SystemError(CCMonitorError):
-    """Base class for system-level errors"""
+class CCMonitorSystemError(CCMonitorError):
+    """Base class for system-level errors."""
 
     def __init__(
         self,
         message: str,
-        cause: Optional[Exception] = None,
-        suggestions: Optional[List[str]] = None,
-    ):
+        cause: Exception | None = None,
+        suggestions: list[str] | None = None,
+    ) -> None:
+        """Initialize system error."""
         super().__init__(
             message=message,
             category=ErrorCategory.SYSTEM,
@@ -431,10 +477,11 @@ class SystemError(CCMonitorError):
         )
 
 
-class InsufficientMemoryError(SystemError):
-    """Raised when system runs out of memory"""
+class InsufficientMemoryError(CCMonitorSystemError):
+    """Raised when system runs out of memory."""
 
-    def __init__(self, required_memory: Optional[int] = None):
+    def __init__(self, required_memory: int | None = None) -> None:
+        """Initialize out of memory error."""
         suggestions = [
             "Close other applications to free memory",
             "Use streaming mode for large files",
@@ -444,15 +491,18 @@ class InsufficientMemoryError(SystemError):
         if required_memory:
             message += f" (required: {required_memory} MB)"
 
-        super().__init__(message=message, suggestions=suggestions)
+        super().__init__(message, suggestions=suggestions)
 
 
-class DependencyError(SystemError):
-    """Raised when required dependencies are missing"""
+class DependencyError(CCMonitorSystemError):
+    """Raised when required dependencies are missing."""
 
     def __init__(
-        self, dependency: str, required_version: Optional[str] = None
-    ):
+        self,
+        dependency: str,
+        required_version: str | None = None,
+    ) -> None:
+        """Initialize dependency error."""
         suggestions = [
             f"Install required dependency: {dependency}",
             "Update package dependencies",
@@ -462,38 +512,41 @@ class DependencyError(SystemError):
         if required_version:
             message += f" (version {required_version} or higher)"
 
-        super().__init__(message=message, suggestions=suggestions)
+        super().__init__(message, suggestions=suggestions)
 
 
 # Error Handler Utility
 
 
 class ErrorHandler:
-    """Utility class for consistent error handling"""
+    """Utility class for consistent error handling."""
 
     @staticmethod
     def handle_file_operation_error(
-        operation: str, file_path: str, original_error: Exception
+        operation: str,
+        file_path: str,
+        original_error: Exception,
     ) -> IOOperationError:
-        """Convert generic file operation errors to specific CCMonitor errors"""
+        """Convert generic file operation errors to specific CCMonitor errors."""
         if isinstance(original_error, FileNotFoundError):
-            return FileNotFoundError(file_path)
-        elif isinstance(original_error, PermissionError):
+            return CCMonitorFileNotFoundError(file_path)
+        if isinstance(original_error, PermissionError):
             return FilePermissionError(file_path, operation)
-        elif "No space left on device" in str(original_error).lower():
+        if "No space left on device" in str(original_error).lower():
             return DiskSpaceError()
-        else:
-            return IOOperationError(
-                message=f"File operation failed: {original_error}",
-                file_path=file_path,
-                cause=original_error,
-            )
+        return IOOperationError(
+            message=f"File operation failed: {original_error}",
+            file_path=file_path,
+            cause=original_error,
+        )
 
     @staticmethod
     def handle_validation_error(
-        entry: Dict[str, Any], line_number: int, validation_errors: List[str]
+        entry: dict[str, Any],
+        line_number: int,
+        validation_errors: list[str],
     ) -> MalformedEntryError:
-        """Create appropriate validation error from validation results"""
+        """Create appropriate validation error from validation results."""
         error_message = "; ".join(validation_errors)
         return MalformedEntryError(
             message=f"Entry validation failed: {error_message}",
@@ -503,9 +556,10 @@ class ErrorHandler:
 
     @staticmethod
     def wrap_unexpected_error(
-        operation: str, original_error: Exception
+        operation: str,
+        original_error: Exception,
     ) -> CCMonitorError:
-        """Wrap unexpected errors in CCMonitor error structure"""
+        """Wrap unexpected errors in CCMonitor error structure."""
         return CCMonitorError(
             message=f"Unexpected error during {operation}: {original_error}",
             category=ErrorCategory.SYSTEM,

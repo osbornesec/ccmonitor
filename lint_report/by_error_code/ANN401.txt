@@ -1,0 +1,13 @@
+=== ANN401 ===
+Category: quality
+Priority: 4
+Fix Difficulty: manual
+Description: Flake8-builtins
+Total occurrences: 1
+Documentation: https://docs.astral.sh/ruff/rules/any-type
+============================================================
+
+File: /home/michael/dev/ccmonitor/src/common/exceptions.py (1 occurrences)
+--------------------------------------------------
+  Line 44: Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`
+

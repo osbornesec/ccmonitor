@@ -1,0 +1,19 @@
+[
+  {
+    "cell": null,
+    "code": "ANN401",
+    "end_location": {
+      "column": 51,
+      "row": 44
+    },
+    "filename": "/home/michael/dev/ccmonitor/src/common/exceptions.py",
+    "fix": null,
+    "location": {
+      "column": 48,
+      "row": 44
+    },
+    "message": "Dynamically typed expressions (typing.Any) are disallowed in `**kwargs`",
+    "noqa_row": 44,
+    "url": "https://docs.astral.sh/ruff/rules/any-type"
+  }
+]

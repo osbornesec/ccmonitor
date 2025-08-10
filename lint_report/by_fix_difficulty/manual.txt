@@ -1,0 +1,13 @@
+=== MANUAL FIXES ===
+Total issues: 1
+
+These require manual intervention
+============================================================
+
+ANN401 (1 occurrences)
+  Category: quality
+  Priority: 4
+  Description: Flake8-builtins
+  Files affected: 1
+    /home/michael/dev/ccmonitor/src/common/exceptions.py: 1
+

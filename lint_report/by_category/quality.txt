@@ -1,0 +1,11 @@
+=== QUALITY LINTS ===
+Total issues: 1
+
+ANN401 (1 occurrences)
+  Priority: 4
+  Fix: manual
+  Description: Flake8-builtins
+  URL: https://docs.astral.sh/ruff/rules/any-type
+  Top affected files:
+    /home/michael/dev/ccmonitor/src/common/exceptions.py: 1
+

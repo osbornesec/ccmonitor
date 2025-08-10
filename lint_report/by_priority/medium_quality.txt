@@ -1,0 +1,6 @@
+=== PRIORITY 4 (MEDIUM_QUALITY) ===
+Total issues: 1
+
+QUALITY: 1 issues
+  ANN401: 1
+

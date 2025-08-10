@@ -1,0 +1,11 @@
+=== COMPREHENSIVE PYTHON LINTING STATISTICS ===
+
+Total files with issues: 1
+Total ruff warnings: 1
+Total mypy errors: 0
+Total mypy warnings: 0
+Total issues: 1
+Unique error codes: 1
+
+Average issues per file: 1.00
+

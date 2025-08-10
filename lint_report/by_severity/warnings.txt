@@ -1,0 +1,8 @@
+=== All WARNINGS ===
+Total: 1
+============================================================
+
+File: src/common/exceptions.py
+ANN401: Dynamically typed expressions (typing.Any) are disallowed in `**kwargs` (line 44, col 48)
+============================================================
+
