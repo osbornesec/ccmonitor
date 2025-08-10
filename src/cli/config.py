@@ -255,7 +255,10 @@ class ConfigManager:
         return asdict(self.config)
 
     def set_config_value(
-        self, key: str, *, value: str | int | bool,
+        self,
+        key: str,
+        *,
+        value: str | int | bool,
     ) -> None:
         """Set configuration value.
 

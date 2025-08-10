@@ -190,9 +190,7 @@ class ConversationFlowError(ValidationError):
         context = ErrorContext(
             operation="Conversation flow validation",
             additional_info=(
-                {"problematic_uuids": problematic_uuids}
-                if problematic_uuids
-                else None
+                {"problematic_uuids": problematic_uuids} if problematic_uuids else None
             ),
         )
         suggestions = [
@@ -440,9 +438,7 @@ class UserInputError(CCMonitorError):
         """Initialize user input error."""
         context = ErrorContext(
             operation="User input validation",
-            additional_info=(
-                {"input_value": input_value} if input_value else None
-            ),
+            additional_info=({"input_value": input_value} if input_value else None),
         )
         super().__init__(
             message=message,

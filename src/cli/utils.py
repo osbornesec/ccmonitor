@@ -340,7 +340,6 @@ def _has_jsonl_extension(path: Path) -> bool:
 def _validate_jsonl_content(path: Path) -> bool:
     """Validate file content as JSONL format."""
     try:
-
         with path.open(encoding="utf-8") as f:
             return _check_sample_lines(f)
     except (OSError, UnicodeDecodeError):

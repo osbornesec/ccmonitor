@@ -1,5 +1,73 @@
 # CCMonitor Project - Claude Code Orchestrator
 
+## PRP-Based Development Workflow
+
+### Overview
+CCMonitor uses a Product Requirements and Planning (PRP) based development workflow that breaks complex features into autonomous, self-contained implementation packages.
+
+### PRP Structure
+```
+PRPs/
+├── todo/           # PRPs waiting to be implemented
+├── doing/          # PRPs currently being worked on  
+├── done/           # Completed PRPs
+└── templates/      # PRP templates for new features
+```
+
+### PRP Lifecycle
+1. **Todo Creation**: Convert ACTIVE_TODOS.md items into detailed PRPs using @prp-todo-to-prp-orchestrator
+2. **PRP Selection**: Move PRP from `todo/` to `doing/` when ready to implement
+3. **Implementation**: Execute PRP using recommended specialist agents
+4. **Completion**: Move completed PRP to `done/` after validation
+
+### Key Agents for PRP Workflow
+
+#### @prp-todo-to-prp-orchestrator
+- **Purpose**: Converts ACTIVE_TODOS.md into comprehensive PRPs
+- **Input**: Active todos and project context
+- **Output**: Detailed PRPs in `PRPs/todo/` directory
+- **Usage**: Automatically triggered when ACTIVE_TODOS.md is updated
+
+#### @prp-specification-writer  
+- **Purpose**: Creates detailed PRP specifications for complex features
+- **Usage**: When existing PRPs need more detail or new features require planning
+- **Output**: High-quality PRPs with complete context for implementation success
+
+#### @prp-execution-orchestrator
+- **Purpose**: Executes PRPs against the codebase with validation loops
+- **Usage**: When implementing PRPs with monitoring and quality gates
+- **Features**: Orchestrates implementation flow, manages validation, ensures success
+
+#### @prp-quality-assurance-specialist
+- **Purpose**: Validates PRP implementation against success criteria
+- **Usage**: During and after PRP implementation for quality verification
+- **Output**: Comprehensive validation reports and success confirmation
+
+### Current Active PRPs (in PRPs/todo/)
+1. **01_core_data_models.md** - Foundation Pydantic models and type system
+2. **02_jsonl_parsing_engine.md** - High-performance JSONL parsing with error recovery  
+3. **03_database_layer.md** - SQLite/SQLAlchemy storage system
+4. **04_tui_framework.md** - Textual-based UI framework and application shell
+5. **05_conversation_list_view.md** - DataTable view with filtering and real-time updates
+6. **06_conversation_detail_view.md** - Message rendering with syntax highlighting
+7. **07_live_monitoring.md** - File watching and real-time monitoring system
+8. **08_statistics_dashboard.md** - Analytics and cost tracking dashboard
+9. **09_search_and_filter.md** - Full-text search and advanced filtering
+10. **10_configuration_management.md** - Settings and configuration system
+11. **11_error_handling_recovery.md** - Comprehensive error handling framework
+12. **12_testing_infrastructure.md** - Complete testing setup with CI/CD
+
+### PRP Implementation Order
+See `PRPs/todo/00_implementation_order.md` for detailed dependency analysis and parallel development opportunities.
+
+### PRP Best Practices
+- Each PRP is self-contained with clear success criteria
+- Use TDD approach - write tests first (4-level validation loop)
+- Maintain backward compatibility during implementation
+- Document API changes and update related PRPs
+- Regular integration testing between components
+- Move PRPs through lifecycle stages systematically
+
 
 
 ### Delegation Rules
@@ -52,13 +120,13 @@ This project uses **uv** for Python package management.
 
 ### Running Tools
 - Linting: `uv run ruff check src/`
-- Type checking: `uv run mypy src/`
+- Type checking: `uv run --with mypy mypy src/`
 - Tests: `uv run pytest`
 
 ## Quality Gates
 Always run before marking task complete:
 - `uv run ruff check src/` - Linting
-- `uv run mypy src/` - Type checking
+- `uv run --with mypy mypy src/` - Type checking
 - `uv run pytest` - Tests (if applicable)
 
 ## Comprehensive Linting Analysis
@@ -166,3 +234,37 @@ For each file in priority order:
 The script automatically cleans up the previous `lint_report/` directory on each run to keep the repository tidy while providing comprehensive analysis for systematic code quality improvement.
 
 Remember: You are the conductor of a 200+ member specialized orchestra. Your value lies in knowing exactly which expert(s) to engage for optimal results.
+
+## Configuration File Management
+
+### Protected Configuration Files
+This project has protected configuration files that maintain strict quality standards:
+- `pyproject.toml` - Main project configuration with linting, formatting, and type checking rules
+- `mypy.ini` - Type checking configuration
+- Other quality control configuration files
+
+### Configuration Change Policy
+**IMPORTANT**: Configuration files are protected by hooks and cannot be modified directly by Claude Code.
+
+If changes to configuration files are needed (such as adding new mypy overrides, changing linting rules, or modifying package dependencies), you must:
+
+1. **Request user approval** - Ask the user to make the specific changes needed
+2. **Provide exact changes** - Specify exactly what needs to be added, modified, or removed
+3. **Explain reasoning** - Clearly explain why the configuration change is necessary
+4. **Wait for user action** - Do not attempt to modify protected files directly
+
+### Example Request Format
+```
+CONFIGURATION CHANGE NEEDED:
+
+File: pyproject.toml
+Section: [[tool.mypy.overrides]]
+Change: Add "textual" and "textual.*" to the ignore_missing_imports module list
+Reason: To resolve mypy type checking errors with the Textual TUI library
+
+Please add these lines to the mypy overrides section:
+    "textual",
+    "textual.*"
+```
+
+This ensures configuration changes are intentional, reviewed, and maintain the project's quality standards.

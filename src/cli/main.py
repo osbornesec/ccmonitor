@@ -461,8 +461,7 @@ class FileMonitor:
             for i, change in enumerate(changes, 1):
                 f.write(f"\n--- Entry {i} ---\n")
                 f.write(
-                    f"JSON Data: "
-                    f"{json.dumps(change, indent=2, ensure_ascii=False)}\n",
+                    f"JSON Data: {json.dumps(change, indent=2, ensure_ascii=False)}\n",
                 )
 
             f.write(f"\n{'=' * 80}\n\n")
@@ -470,9 +469,7 @@ class FileMonitor:
     def _save_state(self) -> None:
         """Save monitoring state."""
         state = {
-            "file_timestamps": {
-                str(k): v for k, v in self.file_timestamps.items()
-            },
+            "file_timestamps": {str(k): v for k, v in self.file_timestamps.items()},
             "file_sizes": {str(k): v for k, v in self.file_sizes.items()},
             "last_run": datetime.now(UTC).isoformat(),
         }
@@ -490,12 +487,9 @@ class FileMonitor:
                 with self.state_file.open() as f:
                     state = json.load(f)
                 timestamps = {
-                    Path(k): v
-                    for k, v in state.get("file_timestamps", {}).items()
+                    Path(k): v for k, v in state.get("file_timestamps", {}).items()
                 }
-                sizes = {
-                    Path(k): v for k, v in state.get("file_sizes", {}).items()
-                }
+                sizes = {Path(k): v for k, v in state.get("file_sizes", {}).items()}
                 return timestamps, sizes
         except (OSError, json.JSONDecodeError) as e:
             if self.verbose:
@@ -523,8 +517,7 @@ def _validate_monitor_directory(directory: Path) -> Path:
     monitor_dir = Path(str(directory)).expanduser()
     if not monitor_dir.exists():
         click.echo(
-            f"{Fore.RED}Error: Directory {monitor_dir} does not exist"
-            f"{Style.RESET_ALL}",
+            f"{Fore.RED}Error: Directory {monitor_dir} does not exist{Style.RESET_ALL}",
             err=True,
         )
         sys.exit(1)

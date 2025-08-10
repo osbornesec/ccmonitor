@@ -1,0 +1,713 @@
+/* CCMonitor Professional TUI Styling */
+
+/* ================================
+   GLOBAL THEME & COLOR SYSTEM
+   ================================ */
+
+/* Base screen layout with professional styling */
+Screen {
+    background: $surface;
+    color: $text;
+    layout: vertical;
+    scrollbar-gutter: stable;
+}
+
+/* Modern header with gradient-like effect */
+Header {
+    dock: top;
+    height: 3;
+    background: $primary;
+    color: $text;
+    content-align: center middle;
+    text-style: bold;
+    border-bottom: heavy $secondary;
+    box-shadow: 0 1 3 0 $primary 30%;
+}
+
+Header .header-title {
+    color: $text;
+    text-style: bold;
+    padding: 0 2;
+}
+
+/* Professional footer with enhanced key display */
+Footer {
+    dock: bottom;
+    height: 3;
+    background: $primary;
+    color: $text;
+    content-align: center middle;
+    border-top: heavy $secondary;
+    box-shadow: 0 -1 3 0 $primary 30%;
+}
+
+Footer Key {
+    background: $secondary;
+    color: $text;
+    text-style: bold;
+    padding: 0 1;
+    border-radius: 1;
+    margin: 0 1;
+}
+
+/* ================================
+   MAIN SCREEN LAYOUT SYSTEM
+   ================================ */
+
+MainScreen {
+    background: $surface;
+}
+
+/* Three-panel horizontal layout */
+#main-container {
+    layout: vertical;
+    height: 100%;
+}
+
+#content-area {
+    layout: horizontal;
+    height: 1fr;
+    margin: 0;
+}
+
+/* ================================
+   PROJECTS PANEL STYLING
+   ================================ */
+
+ProjectsPanel {
+    width: 25%;
+    min-width: 20;
+    max-width: 40;
+    background: $panel;
+    border: round $primary;
+    padding: 1;
+    margin-right: 1;
+}
+
+ProjectsPanel .panel-title {
+    text-style: bold;
+    color: $primary;
+    background: $surface;
+    padding: 0 1;
+    border-bottom: heavy $secondary;
+    margin-bottom: 1;
+    text-align: center;
+}
+
+ProjectsPanel #project-list {
+    height: 1fr;
+    border: solid $secondary 50%;
+    scrollbar-size: 1 1;
+    scrollbar-background: $panel;
+    scrollbar-color: $secondary;
+}
+
+ProjectsPanel #project-list ListItem {
+    padding: 0 1;
+    height: auto;
+    min-height: 1;
+    background: $surface;
+    border-bottom: thin $secondary 30%;
+}
+
+ProjectsPanel #project-list ListItem:hover {
+    background: $primary 20%;
+    border-left: thick $accent;
+}
+
+ProjectsPanel #project-list ListItem:focus {
+    background: $primary 40%;
+    color: $text;
+    border-left: thick $accent;
+}
+
+ProjectsPanel #project-stats {
+    height: 5;
+    border-top: heavy $secondary;
+    padding: 1;
+    margin-top: 1;
+    background: $surface;
+    text-align: center;
+    color: $text-muted;
+}
+
+/* ================================
+   LIVE FEED PANEL STYLING
+   ================================ */
+
+LiveFeedPanel {
+    width: 1fr;
+    background: $surface;
+    border: round $primary;
+    padding: 1;
+}
+
+LiveFeedPanel .panel-title {
+    text-style: bold;
+    color: $primary;
+    background: $panel;
+    padding: 0 1;
+    border-bottom: heavy $secondary;
+    margin-bottom: 1;
+    text-align: center;
+}
+
+LiveFeedPanel #message-scroll {
+    height: 1fr;
+    border: solid $secondary;
+    background: $surface;
+    padding: 1;
+    scrollbar-size: 1 1;
+    scrollbar-background: $panel;
+    scrollbar-color: $secondary;
+    scrollbar-corner-color: $surface;
+}
+
+LiveFeedPanel #message-content {
+    color: $text;
+    background: transparent;
+    text-wrap: auto;
+    overflow: hidden auto;
+}
+
+LiveFeedPanel #message-input {
+    height: 3;
+    margin-top: 1;
+    border: round $accent;
+    background: $surface;
+    color: $text;
+    padding: 0 1;
+}
+
+LiveFeedPanel #message-input:focus {
+    border: thick $accent;
+    background: $panel;
+}
+
+/* ================================
+   HELP SCREEN STYLING
+   ================================ */
+
+HelpScreen {
+    align: center middle;
+    background: $surface 95%;
+}
+
+#help-container {
+    width: 80;
+    height: auto;
+    max-height: 30;
+    background: $panel;
+    border: thick $primary;
+    border-title-align: center;
+    border-title-color: $primary;
+    border-title-background: $panel;
+    border-title-style: bold;
+    padding: 2;
+    box-shadow: 0 4 8 2 $primary 20%;
+}
+
+.help-content {
+    layout: vertical;
+    height: auto;
+    scrollbar-size: 1 1;
+    overflow: hidden auto;
+}
+
+.help-title {
+    text-style: bold;
+    color: $primary;
+    text-align: center;
+    background: $surface;
+    padding: 1;
+    border-bottom: heavy $secondary;
+    margin-bottom: 1;
+}
+
+.section-header {
+    text-style: bold;
+    color: $accent;
+    margin-top: 1;
+    margin-bottom: 1;
+    padding-left: 2;
+    border-left: thick $accent;
+}
+
+.help-item {
+    color: $text;
+    padding-left: 4;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+.help-item:hover {
+    background: $primary 10%;
+    color: $text;
+}
+
+/* ================================
+   ERROR SCREEN STYLING
+   ================================ */
+
+ErrorScreen {
+    align: center middle;
+    background: $surface 95%;
+}
+
+#error-container {
+    width: 70;
+    height: auto;
+    max-height: 20;
+    background: $panel;
+    border: thick $error;
+    border-title-align: center;
+    border-title-color: $error;
+    border-title-background: $panel;
+    border-title-style: bold;
+    padding: 2;
+    box-shadow: 0 4 8 2 $error 30%;
+}
+
+.error-content {
+    layout: vertical;
+    height: auto;
+    align: center top;
+}
+
+.error-title {
+    text-style: bold;
+    color: $error;
+    text-align: center;
+    background: $surface;
+    padding: 1;
+    border-bottom: heavy $error 50%;
+    margin-bottom: 1;
+}
+
+.error-message {
+    color: $text;
+    text-align: center;
+    background: $error 10%;
+    padding: 1;
+    border: thin $error 30%;
+    margin-bottom: 1;
+    text-wrap: auto;
+}
+
+.error-instructions {
+    color: $text-muted;
+    text-align: center;
+    text-style: italic;
+    padding: 1;
+}
+
+/* ================================
+   ENHANCED FOCUS & INTERACTION
+   ================================ */
+
+/* Professional focus states with visual indicators */
+*:focus {
+    border: thick $accent;
+    box-shadow: 0 0 3 1 $accent 40%;
+    outline: none;
+    animation: focus-pulse 2s ease-in-out infinite;
+}
+
+Widget:focus-within {
+    border-color: $accent 70%;
+    box-shadow: 0 0 2 1 $accent 20%;
+}
+
+/* Focus manager visual indicators */
+.focused {
+    border: thick $accent;
+    box-shadow: 0 0 4 2 $accent 50%;
+    animation: focus-glow 1.5s ease-in-out infinite alternate;
+}
+
+.focus-active {
+    background: $accent 10%;
+    border-left: thick $accent;
+    text-style: bold;
+}
+
+/* Navigation focus indicators */
+.nav-focus {
+    border: thick $primary;
+    background: $primary 20%;
+    box-shadow: 0 0 3 1 $primary 40%;
+}
+
+/* Button and interactive element styling */
+Button {
+    background: $primary;
+    color: $text;
+    border: solid $primary;
+    padding: 1 2;
+    text-style: bold;
+}
+
+Button:hover {
+    background: $primary-lighten-1;
+    border: solid $primary-lighten-1;
+}
+
+Button:focus {
+    border: thick $accent;
+    background: $primary-lighten-1;
+}
+
+Button.-primary {
+    background: $accent;
+    border: solid $accent;
+}
+
+Button.-secondary {
+    background: $secondary;
+    border: solid $secondary;
+}
+
+/* Input field enhancements */
+Input {
+    border: solid $secondary;
+    background: $surface;
+    color: $text;
+    padding: 0 1;
+}
+
+Input:focus {
+    border: thick $accent;
+    background: $panel;
+}
+
+Input.-invalid {
+    border: solid $error;
+    background: $error 10%;
+}
+
+/* ================================
+   LIST AND SCROLLABLE ELEMENTS
+   ================================ */
+
+/* Enhanced ListView styling */
+ListView {
+    background: $surface;
+    border: solid $secondary;
+    scrollbar-size: 1 1;
+    scrollbar-background: $panel;
+    scrollbar-color: $secondary;
+}
+
+ListView > ListItem {
+    background: $surface;
+    color: $text;
+    padding: 0 1;
+    border-bottom: thin $secondary 20%;
+}
+
+ListView > ListItem:hover {
+    background: $primary 15%;
+}
+
+ListView > ListItem.-highlighted {
+    background: $accent 20%;
+    border-left: thick $accent;
+}
+
+/* NavigableList specific focus and cursor styling */
+NavigableList > ListItem.cursor-active {
+    background: $primary 30%;
+    color: $text;
+    border-left: thick $warning;
+    text-style: bold;
+    animation: cursor-pulse 1.8s ease-in-out infinite;
+}
+
+NavigableList:focus > ListItem.cursor-active {
+    background: $primary 40%;
+    border-left: thick $accent;
+    box-shadow: 0 0 2 1 $accent 40%;
+    animation: cursor-glow 1.5s ease-in-out infinite alternate;
+}
+
+/* Panel focus indicators */
+ProjectsPanel:focus,
+LiveFeedPanel:focus {
+    border: thick $accent;
+    box-shadow: 0 0 4 2 $accent 30%;
+}
+
+ProjectsPanel.focused,
+LiveFeedPanel.focused {
+    border: thick $accent;
+    background: $accent 5%;
+    animation: panel-focus-glow 2s ease-in-out infinite alternate;
+}
+
+/* Scrollbar theming */
+::-webkit-scrollbar {
+    background: $panel;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $secondary;
+    border-radius: 1;
+}
+
+::-webkit-scrollbar-track {
+    background: $surface;
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+/* Small terminal adaptations */
+@media (max-width: 100) {
+    #content-area {
+        layout: vertical;
+    }
+    
+    ProjectsPanel {
+        width: 100%;
+        height: 10;
+        min-height: 8;
+        margin-right: 0;
+        margin-bottom: 1;
+    }
+    
+    LiveFeedPanel {
+        width: 100%;
+        height: 1fr;
+    }
+    
+    #help-container {
+        width: 90%;
+        height: 90%;
+    }
+    
+    #error-container {
+        width: 90%;
+    }
+}
+
+/* Very small terminal handling */
+@media (max-width: 80) {
+    Header {
+        height: 2;
+    }
+    
+    Footer {
+        height: 2;
+    }
+    
+    ProjectsPanel {
+        height: 6;
+        padding: 0;
+    }
+    
+    ProjectsPanel .panel-title {
+        padding: 0;
+        margin-bottom: 0;
+    }
+    
+    #help-container {
+        width: 95%;
+        height: 95%;
+        padding: 1;
+    }
+    
+    #error-container {
+        width: 95%;
+        padding: 1;
+    }
+}
+
+/* ================================
+   ANIMATIONS & TRANSITIONS
+   ================================ */
+
+/* Smooth fade-in for new content */
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        offset: 0 -2;
+    }
+    100% {
+        opacity: 1;
+        offset: 0 0;
+    }
+}
+
+@keyframes slide-in-right {
+    0% {
+        opacity: 0;
+        offset: 4 0;
+    }
+    100% {
+        opacity: 1;
+        offset: 0 0;
+    }
+}
+
+@keyframes slide-in-left {
+    0% {
+        opacity: 0;
+        offset: -4 0;
+    }
+    100% {
+        opacity: 1;
+        offset: 0 0;
+    }
+}
+
+/* Focus animations for enhanced visual feedback */
+@keyframes focus-pulse {
+    0%, 100% {
+        box-shadow: 0 0 3 1 $accent 40%;
+    }
+    50% {
+        box-shadow: 0 0 5 2 $accent 60%;
+    }
+}
+
+@keyframes focus-glow {
+    0% {
+        box-shadow: 0 0 4 2 $accent 30%;
+    }
+    100% {
+        box-shadow: 0 0 6 3 $accent 70%;
+    }
+}
+
+/* NavigableList cursor animations */
+@keyframes cursor-pulse {
+    0%, 100% {
+        border-left: thick $warning;
+        background: $primary 30%;
+    }
+    50% {
+        border-left: thick $accent;
+        background: $primary 40%;
+    }
+}
+
+@keyframes cursor-glow {
+    0% {
+        box-shadow: 0 0 2 1 $accent 30%;
+    }
+    100% {
+        box-shadow: 0 0 4 2 $accent 60%;
+    }
+}
+
+/* Panel focus animations */
+@keyframes panel-focus-glow {
+    0% {
+        background: $accent 5%;
+        box-shadow: 0 0 4 2 $accent 20%;
+    }
+    100% {
+        background: $accent 10%;
+        box-shadow: 0 0 6 3 $accent 40%;
+    }
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+
+.slide-in-right {
+    animation: slide-in-right 0.4s ease-out;
+}
+
+.slide-in-left {
+    animation: slide-in-left 0.4s ease-out;
+}
+
+/* ================================
+   STATUS & INDICATOR STYLING
+   ================================ */
+
+/* Enhanced status indicators */
+.status-active {
+    color: $success;
+    text-style: bold;
+    background: $success 10%;
+    padding: 0 1;
+    border-left: thick $success;
+}
+
+.status-paused {
+    color: $warning;
+    text-style: bold;
+    background: $warning 10%;
+    padding: 0 1;
+    border-left: thick $warning;
+}
+
+.status-error {
+    color: $error;
+    text-style: bold;
+    background: $error 10%;
+    padding: 0 1;
+    border-left: thick $error;
+}
+
+.status-info {
+    color: $info;
+    text-style: bold;
+    background: $info 10%;
+    padding: 0 1;
+    border-left: thick $info;
+}
+
+/* Loading states with pulse animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.loading {
+    text-style: italic;
+    color: $text-muted;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading::after {
+    content: "...";
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+
+/* Text alignment utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Spacing utilities */
+.m-0 { margin: 0; }
+.m-1 { margin: 1; }
+.p-0 { padding: 0; }
+.p-1 { padding: 1; }
+.p-2 { padding: 2; }
+
+/* Border utilities */
+.border-primary { border: solid $primary; }
+.border-secondary { border: solid $secondary; }
+.border-accent { border: solid $accent; }
+.border-round { border: round $primary; }
+
+/* Background utilities */
+.bg-surface { background: $surface; }
+.bg-panel { background: $panel; }
+.bg-primary { background: $primary; }
+
+/* Hide/show utilities */
+.hidden { visibility: hidden; }
+.visible { visibility: visible; }
