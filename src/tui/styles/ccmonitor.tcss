@@ -48,6 +48,14 @@ Footer Key {
     padding: 0 1;
     border-radius: 1;
     margin: 0 1;
+    border: solid $secondary;
+    transition: background 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+}
+
+Footer Key:hover {
+    background: $primary;
+    border: solid $primary;
+    box-shadow: 0 1 2 0 $primary 40%;
 }
 
 /* ================================
@@ -113,12 +121,17 @@ ProjectsPanel #project-list ListItem {
 ProjectsPanel #project-list ListItem:hover {
     background: $primary 20%;
     border-left: thick $accent;
+    offset: 1 0;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 0 0 1 $primary 20%;
 }
 
 ProjectsPanel #project-list ListItem:focus {
     background: $primary 40%;
     color: $text;
     border-left: thick $accent;
+    box-shadow: 0 0 3 1 $accent 40%;
+    animation: bounce-in 0.3s ease-out;
 }
 
 ProjectsPanel #project-stats {
@@ -128,7 +141,7 @@ ProjectsPanel #project-stats {
     margin-top: 1;
     background: $surface;
     text-align: center;
-    color: $text-muted;
+    color: $foreground-muted;
 }
 
 /* ================================
@@ -182,6 +195,14 @@ LiveFeedPanel #message-input {
 LiveFeedPanel #message-input:focus {
     border: thick $accent;
     background: $panel;
+    box-shadow: 0 0 4 2 $accent 50%;
+    animation: focus-glow 3s infinite;
+}
+
+LiveFeedPanel #message-input:hover {
+    border: solid $accent 70%;
+    background: $panel 50%;
+    transition: all 0.2s ease;
 }
 
 /* ================================
@@ -295,7 +316,7 @@ ErrorScreen {
 }
 
 .error-instructions {
-    color: $text-muted;
+    color: $foreground-muted;
     text-align: center;
     text-style: italic;
     padding: 1;
@@ -308,21 +329,21 @@ ErrorScreen {
 /* Professional focus states with visual indicators */
 *:focus {
     border: thick $accent;
-    box-shadow: 0 0 3 1 $accent 40%;
+    box-shadow: 0 0 4 2 $accent 50%;
     outline: none;
-    animation: focus-pulse 2s ease-in-out infinite;
+    transition: border 0.2s ease, box-shadow 0.3s ease;
 }
 
 Widget:focus-within {
-    border-color: $accent 70%;
-    box-shadow: 0 0 2 1 $accent 20%;
+    border-color: $accent 80%;
+    box-shadow: 0 0 3 1 $accent 30%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Focus manager visual indicators */
 .focused {
     border: thick $accent;
     box-shadow: 0 0 4 2 $accent 50%;
-    animation: focus-glow 1.5s ease-in-out infinite alternate;
 }
 
 .focus-active {
@@ -338,23 +359,42 @@ Widget:focus-within {
     box-shadow: 0 0 3 1 $primary 40%;
 }
 
-/* Button and interactive element styling */
+/* Button and interactive element styling with smooth transitions */
 Button {
     background: $primary;
     color: $text;
     border: solid $primary;
     padding: 1 2;
     text-style: bold;
+    border-radius: 1;
+    transition: background 0.2s ease, border 0.2s ease, offset 0.1s ease;
 }
 
 Button:hover {
     background: $primary-lighten-1;
     border: solid $primary-lighten-1;
+    box-shadow: 0 2 4 1 $primary 30%;
+    text-style: bold;
 }
 
 Button:focus {
     border: thick $accent;
     background: $primary-lighten-1;
+    box-shadow: 0 0 4 2 $accent 60%;
+}
+
+Button:active {
+    background: $primary-darken-1;
+    offset: 0 1;
+    box-shadow: 0 1 2 0 $primary 40%;
+}
+
+Button:disabled {
+    background: $secondary 50%;
+    color: $text 50%;
+    border: solid $secondary 50%;
+    text-style: dim;
+    box-shadow: none;
 }
 
 Button.-primary {
@@ -367,32 +407,49 @@ Button.-secondary {
     border: solid $secondary;
 }
 
-/* Input field enhancements */
+/* Input field enhancements with professional styling */
 Input {
     border: solid $secondary;
     background: $surface;
     color: $text;
     padding: 0 1;
+    border-radius: 1;
+    transition: border 0.3s ease, background 0.2s ease, box-shadow 0.3s ease;
 }
 
 Input:focus {
     border: thick $accent;
     background: $panel;
+    box-shadow: 0 0 3 1 $accent 40%;
+}
+
+Input:hover {
+    border: solid $accent 60%;
+    background: $panel 50%;
 }
 
 Input.-invalid {
-    border: solid $error;
+    border: thick $error;
     background: $error 10%;
+    box-shadow: 0 0 2 1 $error 30%;
+    animation: pulse 1s ease-in-out 3;
+}
+
+Input.-valid {
+    border: solid $success;
+    background: $success 5%;
+    box-shadow: 0 0 2 1 $success 30%;
 }
 
 /* ================================
    LIST AND SCROLLABLE ELEMENTS
    ================================ */
 
-/* Enhanced ListView styling */
+/* Enhanced ListView styling with smooth interactions */
 ListView {
     background: $surface;
     border: solid $secondary;
+    border-radius: 1;
     scrollbar-size: 1 1;
     scrollbar-background: $panel;
     scrollbar-color: $secondary;
@@ -403,219 +460,173 @@ ListView > ListItem {
     color: $text;
     padding: 0 1;
     border-bottom: thin $secondary 20%;
+    transition: background 0.2s ease, border-left 0.2s ease, offset 0.1s ease;
 }
 
 ListView > ListItem:hover {
     background: $primary 15%;
+    border-left: solid $primary 60%;
+    offset: 2 0;
+}
+
+ListView > ListItem:focus {
+    background: $primary 25%;
+    border-left: thick $accent;
+    box-shadow: inset 0 0 0 1 $accent 30%;
 }
 
 ListView > ListItem.-highlighted {
     background: $accent 20%;
     border-left: thick $accent;
+    text-style: bold;
+    box-shadow: inset 0 0 0 1 $accent 20%;
+    animation: bounce-in 0.4s ease-out;
 }
 
-/* NavigableList specific focus and cursor styling */
+ListView > ListItem.-selected {
+    background: $accent 30%;
+    color: $text;
+    border-left: thick $accent;
+    text-style: bold;
+}
+
+/* NavigableList specific focus and cursor styling with enhanced animations */
 NavigableList > ListItem.cursor-active {
     background: $primary 30%;
     color: $text;
     border-left: thick $warning;
     text-style: bold;
-    animation: cursor-pulse 1.8s ease-in-out infinite;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
 }
 
 NavigableList:focus > ListItem.cursor-active {
     background: $primary 40%;
     border-left: thick $accent;
-    box-shadow: 0 0 2 1 $accent 40%;
-    animation: cursor-glow 1.5s ease-in-out infinite alternate;
+    box-shadow: 0 0 3 1 $accent 50%;
+    animation: focus-glow 2s infinite;
 }
 
-/* Panel focus indicators */
+NavigableList > ListItem.cursor-moving {
+    animation: slide-in-right 0.2s ease-out;
+}
+
+/* Panel focus indicators with enhanced visual feedback */
 ProjectsPanel:focus,
 LiveFeedPanel:focus {
     border: thick $accent;
-    box-shadow: 0 0 4 2 $accent 30%;
+    box-shadow: 0 0 6 3 $accent 40%;
+    background: $accent 5%;
+    transition: border 0.3s ease, box-shadow 0.3s ease, background 0.2s ease;
 }
 
 ProjectsPanel.focused,
 LiveFeedPanel.focused {
     border: thick $accent;
-    background: $accent 5%;
-    animation: panel-focus-glow 2s ease-in-out infinite alternate;
+    background: $accent 8%;
+    box-shadow: 0 0 4 2 $accent 30%;
+    animation: focus-glow 3s infinite;
 }
 
-/* Scrollbar theming */
-::-webkit-scrollbar {
-    background: $panel;
+ProjectsPanel:hover,
+LiveFeedPanel:hover {
+    border: solid $accent 70%;
+    background: $accent 3%;
+    transition: all 0.2s ease;
 }
 
-::-webkit-scrollbar-thumb {
-    background: $secondary;
-    border-radius: 1;
-}
-
-::-webkit-scrollbar-track {
-    background: $surface;
-}
+/* Scrollbar theming - Textual uses built-in scrollbar styling */
 
 /* ================================
    RESPONSIVE DESIGN
    ================================ */
 
-/* Small terminal adaptations */
-@media (max-width: 100) {
-    #content-area {
-        layout: vertical;
-    }
-    
-    ProjectsPanel {
-        width: 100%;
-        height: 10;
-        min-height: 8;
-        margin-right: 0;
-        margin-bottom: 1;
-    }
-    
-    LiveFeedPanel {
-        width: 100%;
-        height: 1fr;
-    }
-    
-    #help-container {
-        width: 90%;
-        height: 90%;
-    }
-    
-    #error-container {
-        width: 90%;
-    }
-}
-
-/* Very small terminal handling */
-@media (max-width: 80) {
-    Header {
-        height: 2;
-    }
-    
-    Footer {
-        height: 2;
-    }
-    
-    ProjectsPanel {
-        height: 6;
-        padding: 0;
-    }
-    
-    ProjectsPanel .panel-title {
-        padding: 0;
-        margin-bottom: 0;
-    }
-    
-    #help-container {
-        width: 95%;
-        height: 95%;
-        padding: 1;
-    }
-    
-    #error-container {
-        width: 95%;
-        padding: 1;
-    }
-}
+/* Responsive design - Textual doesn't support @media queries */
+/* Small terminal adaptations would be handled in Python code */
 
 /* ================================
    ANIMATIONS & TRANSITIONS
    ================================ */
 
-/* Smooth fade-in for new content */
-@keyframes fade-in {
-    0% {
+/* CSS Keyframe Animations */
+@keyframes message-appear {
+    from {
         opacity: 0;
-        offset: 0 -2;
+        offset: 0 -10;
     }
-    100% {
+    to {
         opacity: 1;
         offset: 0 0;
     }
 }
 
-@keyframes slide-in-right {
-    0% {
-        opacity: 0;
-        offset: 4 0;
-    }
-    100% {
-        opacity: 1;
-        offset: 0 0;
-    }
+@keyframes spin {
+    from { offset: 0 0; }
+    to { offset: 0 0; }
 }
 
-@keyframes slide-in-left {
-    0% {
-        opacity: 0;
-        offset: -4 0;
-    }
-    100% {
-        opacity: 1;
-        offset: 0 0;
-    }
-}
-
-/* Focus animations for enhanced visual feedback */
-@keyframes focus-pulse {
-    0%, 100% {
-        box-shadow: 0 0 3 1 $accent 40%;
-    }
-    50% {
-        box-shadow: 0 0 5 2 $accent 60%;
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 @keyframes focus-glow {
-    0% {
-        box-shadow: 0 0 4 2 $accent 30%;
+    0%, 100% { box-shadow: 0 0 0 0 $accent 0%; }
+    50% { box-shadow: 0 0 4 2 $accent 60%; }
+}
+
+@keyframes slide-in-right {
+    from { offset: 100% 0; opacity: 0; }
+    to { offset: 0 0; opacity: 1; }
+}
+
+@keyframes slide-in-left {
+    from { offset: -100% 0; opacity: 0; }
+    to { offset: 0 0; opacity: 1; }
+}
+
+@keyframes slide-in-top {
+    from { offset: 0 -100%; opacity: 0; }
+    to { offset: 0 0; opacity: 1; }
+}
+
+@keyframes slide-in-bottom {
+    from { offset: 0 100%; opacity: 0; }
+    to { offset: 0 0; opacity: 1; }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes bounce-in {
+    0% { 
+        opacity: 0;
+        offset: 0 -20;
+    }
+    60% {
+        opacity: 1;
+        offset: 0 2;
     }
     100% {
-        box-shadow: 0 0 6 3 $accent 70%;
+        opacity: 1;
+        offset: 0 0;
     }
 }
 
-/* NavigableList cursor animations */
-@keyframes cursor-pulse {
-    0%, 100% {
-        border-left: thick $warning;
-        background: $primary 30%;
-    }
-    50% {
-        border-left: thick $accent;
-        background: $primary 40%;
-    }
-}
-
-@keyframes cursor-glow {
-    0% {
-        box-shadow: 0 0 2 1 $accent 30%;
-    }
-    100% {
-        box-shadow: 0 0 4 2 $accent 60%;
-    }
-}
-
-/* Panel focus animations */
-@keyframes panel-focus-glow {
-    0% {
-        background: $accent 5%;
-        box-shadow: 0 0 4 2 $accent 20%;
-    }
-    100% {
-        background: $accent 10%;
-        box-shadow: 0 0 6 3 $accent 40%;
-    }
-}
-
-/* Animation classes */
+/* Animation Classes */
 .fade-in {
     animation: fade-in 0.3s ease-out;
+}
+
+.fade-out {
+    animation: fade-out 0.3s ease-in;
 }
 
 .slide-in-right {
@@ -624,6 +635,34 @@ LiveFeedPanel.focused {
 
 .slide-in-left {
     animation: slide-in-left 0.4s ease-out;
+}
+
+.slide-in-top {
+    animation: slide-in-top 0.4s ease-out;
+}
+
+.slide-in-bottom {
+    animation: slide-in-bottom 0.4s ease-out;
+}
+
+.bounce-in {
+    animation: bounce-in 0.6s ease-out;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+.focus-glow {
+    animation: focus-glow 2s infinite;
+}
+
+.new-message {
+    animation: message-appear 0.3s ease-out;
 }
 
 /* ================================
@@ -637,6 +676,9 @@ LiveFeedPanel.focused {
     background: $success 10%;
     padding: 0 1;
     border-left: thick $success;
+    border-radius: 0 1 1 0;
+    animation: pulse 2s infinite;
+    transition: all 0.3s ease;
 }
 
 .status-paused {
@@ -645,6 +687,9 @@ LiveFeedPanel.focused {
     background: $warning 10%;
     padding: 0 1;
     border-left: thick $warning;
+    border-radius: 0 1 1 0;
+    animation: pulse 3s infinite;
+    transition: all 0.3s ease;
 }
 
 .status-error {
@@ -653,36 +698,58 @@ LiveFeedPanel.focused {
     background: $error 10%;
     padding: 0 1;
     border-left: thick $error;
+    border-radius: 0 1 1 0;
+    animation: pulse 1s infinite;
+    box-shadow: 0 0 2 1 $error 30%;
+    transition: all 0.3s ease;
 }
 
 .status-info {
-    color: $info;
+    color: $primary;
     text-style: bold;
-    background: $info 10%;
+    background: $primary 10%;
     padding: 0 1;
-    border-left: thick $info;
+    border-left: thick $primary;
+    border-radius: 0 1 1 0;
+    transition: all 0.3s ease;
 }
 
-/* Loading states with pulse animation */
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+.status-connecting {
+    color: $secondary;
+    text-style: bold italic;
+    background: $secondary 10%;
+    padding: 0 1;
+    border-left: thick $secondary;
+    border-radius: 0 1 1 0;
+    animation: spin 2s linear infinite;
 }
 
+/* Enhanced loading states with animations */
 .loading {
     text-style: italic;
-    color: $text-muted;
-    animation: pulse 1.5s ease-in-out infinite;
+    color: $foreground-muted;
+    animation: pulse 1.5s infinite;
 }
 
-.loading::after {
+.loading-spinner {
+    animation: spin 1s linear infinite;
+    color: $primary;
+}
+
+.loading-dots::after {
     content: "...";
-    animation: pulse 1s ease-in-out infinite;
+    animation: pulse 1s infinite;
+}
+
+.loading-progress {
+    background: $primary 20%;
+    border: solid $primary;
+    border-radius: 1;
+    animation: pulse 2s infinite;
 }
 
 /* ================================
-   UTILITY CLASSES
+   UTILITY CLASSES & VISUAL EFFECTS
    ================================ */
 
 /* Text alignment utilities */
@@ -697,17 +764,683 @@ LiveFeedPanel.focused {
 .p-1 { padding: 1; }
 .p-2 { padding: 2; }
 
-/* Border utilities */
-.border-primary { border: solid $primary; }
-.border-secondary { border: solid $secondary; }
-.border-accent { border: solid $accent; }
+/* Border utilities with rounded corners */
+.border-primary { border: round $primary; }
+.border-secondary { border: round $secondary; }
+.border-accent { border: round $accent; }
+.border-success { border: round $success; }
+.border-warning { border: round $warning; }
+.border-error { border: round $error; }
 .border-round { border: round $primary; }
+.border-thick { border: thick $primary; }
 
-/* Background utilities */
+/* Background utilities with gradients */
 .bg-surface { background: $surface; }
 .bg-panel { background: $panel; }
 .bg-primary { background: $primary; }
+.bg-gradient-primary { 
+    background: $primary;
+    box-shadow: inset 0 1 0 0 $primary-lighten-1;
+}
+.bg-gradient-surface { 
+    background: $surface;
+    box-shadow: inset 0 1 0 0 $panel;
+}
 
-/* Hide/show utilities */
-.hidden { visibility: hidden; }
-.visible { visibility: visible; }
+/* Shadow effects for elevation */
+.shadow-none { box-shadow: none; }
+.shadow-sm { box-shadow: 0 1 2 0 $primary 20%; }
+.shadow { box-shadow: 0 2 4 1 $primary 25%; }
+.shadow-lg { box-shadow: 0 4 8 2 $primary 30%; }
+.shadow-xl { box-shadow: 0 6 12 3 $primary 35%; }
+
+/* Glow effects */
+.glow-primary { box-shadow: 0 0 4 2 $primary 60%; }
+.glow-accent { box-shadow: 0 0 4 2 $accent 60%; }
+.glow-success { box-shadow: 0 0 4 2 $success 60%; }
+.glow-warning { box-shadow: 0 0 4 2 $warning 60%; }
+.glow-error { box-shadow: 0 0 4 2 $error 60%; }
+
+/* Interactive states */
+.interactive {
+    transition: all 0.2s ease;
+}
+.interactive:hover {
+    box-shadow: 0 2 4 1 $primary 30%;
+    offset: 0 -1;
+}
+
+/* Elevated surfaces */
+.elevated {
+    box-shadow: 0 2 4 1 $primary 20%;
+    border: round $primary;
+    background: $panel;
+}
+.elevated:hover {
+    box-shadow: 0 4 8 2 $primary 30%;
+    background: $primary 5%;
+}
+
+/* Status color utilities */
+.text-success { color: $success; }
+.text-warning { color: $warning; }
+.text-error { color: $error; }
+.text-info { color: $info; }
+.text-muted { color: $text-muted; }
+.text-primary { color: $primary; }
+.text-accent { color: $accent; }
+
+/* Hide/show utilities with transitions */
+.hidden { 
+    visibility: hidden; 
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.visible { 
+    visibility: visible; 
+    opacity: 1;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Professional button variants */
+.btn-primary {
+    background: $primary;
+    color: $text;
+    border: round $primary;
+    padding: 1 2;
+    text-style: bold;
+    transition: all 0.2s ease;
+}
+.btn-primary:hover {
+    background: $primary-lighten-1;
+    box-shadow: 0 2 4 1 $primary 40%;
+}
+
+.btn-secondary {
+    background: $secondary;
+    color: $text;
+    border: round $secondary;
+    padding: 1 2;
+    transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+    background: $secondary-lighten-1;
+    box-shadow: 0 2 4 1 $secondary 40%;
+}
+
+.btn-success {
+    background: $success;
+    color: $text;
+    border: round $success;
+    padding: 1 2;
+    transition: all 0.2s ease;
+}
+.btn-success:hover {
+    background: $success-lighten-1;
+    box-shadow: 0 2 4 1 $success 40%;
+}
+
+/* ================================
+   LOADING INDICATORS & PROGRESS
+   ================================ */
+
+/* Loading indicator with spinner animation */
+LoadingIndicator {
+    layout: horizontal;
+    height: auto;
+    width: auto;
+    align: center middle;
+    content-align: center middle;
+    background: transparent;
+}
+
+LoadingIndicator .loading-spinner {
+    width: 3;
+    height: 1;
+    content-align: center middle;
+    color: $status-loading;
+    text-style: bold;
+    margin-right: 1;
+}
+
+LoadingIndicator .loading-message {
+    height: 1;
+    width: auto;
+    color: $text;
+    text-style: italic;
+    content-align: left middle;
+    background: transparent;
+}
+
+LoadingIndicator.pulse .loading-spinner {
+    background: $status-loading 20%;
+    border: solid $status-loading 50%;
+    border-radius: 1;
+}
+
+LoadingIndicator.pulse .loading-message {
+    color: $status-loading;
+}
+
+/* Progress indicator with ETA and percentage */
+ProgressIndicator {
+    layout: vertical;
+    height: auto;
+    width: 100%;
+    background: transparent;
+    padding: 1;
+    border: solid $secondary;
+    border-radius: 1;
+}
+
+ProgressIndicator .progress-header {
+    layout: horizontal;
+    height: 1;
+    width: 100%;
+    margin-bottom: 1;
+}
+
+ProgressIndicator .progress-title {
+    width: 1fr;
+    color: $text;
+    text-style: bold;
+    content-align: left middle;
+}
+
+ProgressIndicator .progress-percentage {
+    width: auto;
+    color: $accent;
+    text-style: bold;
+    content-align: right middle;
+    margin-left: 2;
+}
+
+ProgressIndicator .progress-bar-container {
+    height: 1;
+    width: 100%;
+    margin-bottom: 1;
+    border: solid $secondary 50%;
+    background: $surface;
+}
+
+ProgressIndicator .progress-details {
+    layout: horizontal;
+    height: 1;
+    width: 100%;
+}
+
+ProgressIndicator .progress-count {
+    width: 1fr;
+    color: $text-muted;
+    content-align: left middle;
+}
+
+ProgressIndicator .progress-eta {
+    width: auto;
+    color: $info;
+    content-align: right middle;
+    text-style: italic;
+}
+
+ProgressIndicator.completed {
+    border: solid $success;
+    background: $success 5%;
+}
+
+ProgressIndicator.completed .progress-title {
+    color: $success;
+}
+
+ProgressIndicator.completed .progress-percentage {
+    color: $success;
+}
+
+ProgressIndicator.error {
+    border: solid $error;
+    background: $error 5%;
+}
+
+ProgressIndicator.error .progress-title {
+    color: $error;
+}
+
+/* ================================
+   MESSAGE TYPE STYLING
+   ================================ */
+
+/* Message type containers with distinctive styling */
+.message-user {
+    color: $primary;
+    background: $primary 8%;
+    border: round $primary;
+    border-left: thick $primary;
+    padding: 1;
+    margin-bottom: 1;
+    box-shadow: 0 1 3 0 $primary 20%;
+    animation: slide-in-right 0.3s ease-out;
+}
+
+.message-assistant {
+    color: $success;
+    background: $success 8%;
+    border: round $success;
+    border-left: thick $success;
+    padding: 1;
+    margin-bottom: 1;
+    box-shadow: 0 1 3 0 $success 20%;
+    animation: slide-in-left 0.3s ease-out;
+}
+
+.message-system {
+    color: $warning;
+    background: $warning 8%;
+    border: round $warning;
+    border-left: thick $warning;
+    padding: 1;
+    margin-bottom: 1;
+    box-shadow: 0 1 3 0 $warning 20%;
+    animation: fade-in 0.3s ease-out;
+}
+
+.message-tool {
+    color: $info;
+    background: $info 8%;
+    border: round $info;
+    border-left: thick $info;
+    padding: 1;
+    margin-bottom: 1;
+    box-shadow: 0 1 3 0 $info 20%;
+    animation: bounce-in 0.4s ease-out;
+}
+
+.message-error {
+    color: $error;
+    background: $error 8%;
+    border: round $error;
+    border-left: thick $error;
+    padding: 1;
+    margin-bottom: 1;
+    box-shadow: 0 1 3 0 $error 30%;
+    animation: bounce-in 0.4s ease-out;
+    text-style: bold;
+}
+
+/* Message headers with icons */
+.message-header {
+    text-style: bold;
+    padding-bottom: 1;
+    border-bottom: thin $secondary 30%;
+    margin-bottom: 1;
+}
+
+.message-timestamp {
+    color: $text-muted;
+    text-style: italic;
+    text-align: right;
+    padding-top: 1;
+    border-top: thin $secondary 20%;
+    margin-top: 1;
+}
+
+/* Code block styling within messages */
+.code-block {
+    background: $surface;
+    border: solid $secondary;
+    border-radius: 1;
+    padding: 1;
+    margin: 1 0;
+    font-family: monospace;
+    overflow: auto;
+}
+
+.code-inline {
+    background: $panel;
+    border: thin $secondary;
+    padding: 0 1;
+    border-radius: 1;
+    font-family: monospace;
+}
+
+/* ================================
+   FILTER PANEL STYLING
+   ================================ */
+
+/* Main filter panel */
+FilterPanel {
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    background: $surface;
+    border: round $primary;
+    border-title-color: $primary;
+    border-title-style: bold;
+    padding: 1;
+    margin-bottom: 1;
+}
+
+FilterPanel.collapsed {
+    height: 3;
+    overflow: hidden;
+    border: solid $secondary;
+}
+
+FilterPanel.expanded {
+    height: auto;
+    max-height: 50vh;
+    border: thick $primary;
+    box-shadow: 0 2 4 1 $primary 20%;
+}
+
+.filter-header {
+    height: 3;
+    padding: 0 1;
+    border-bottom: solid $secondary;
+    margin-bottom: 1;
+    layout: horizontal;
+}
+
+.filter-title {
+    text-style: bold;
+    color: $primary;
+    content-align: left middle;
+    width: 1fr;
+}
+
+.toggle-button {
+    width: auto;
+    height: 1;
+    background: $secondary;
+    color: $text;
+    border: round $secondary;
+    padding: 0 1;
+    text-style: bold;
+    transition: all 0.2s ease;
+}
+
+.toggle-button:hover {
+    background: $primary;
+    border: round $primary;
+    box-shadow: 0 1 2 0 $primary 30%;
+}
+
+.filter-content {
+    height: auto;
+    padding: 1;
+    overflow: auto;
+}
+
+.filter-row {
+    height: auto;
+    margin-bottom: 1;
+    layout: horizontal;
+}
+
+.filter-column {
+    width: 1fr;
+    height: auto;
+    margin: 0 1;
+}
+
+.actions-row {
+    height: auto;
+    margin-top: 1;
+    border-top: solid $secondary;
+    padding-top: 1;
+}
+
+/* Filter control widgets */
+MessageTypeFilter {
+    height: auto;
+    padding: 1;
+    border: round $secondary;
+    background: $panel;
+    margin-bottom: 1;
+}
+
+TimeRangeFilter {
+    height: auto;
+    padding: 1;
+    border: round $secondary;
+    background: $panel;
+    margin-bottom: 1;
+}
+
+SearchFilter {
+    height: auto;
+    padding: 1;
+    border: round $secondary;
+    background: $panel;
+    margin-bottom: 1;
+}
+
+.filter-section-title {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+    text-align: center;
+    background: $surface;
+    padding: 0 1;
+    border-bottom: thin $secondary;
+}
+
+.type-checkbox {
+    margin: 0 1;
+    background: transparent;
+}
+
+.type-checkbox:hover {
+    background: $primary 10%;
+    border-radius: 1;
+}
+
+.time-select {
+    margin-bottom: 1;
+    border: solid $secondary;
+    background: $surface;
+}
+
+.time-select:focus {
+    border: thick $accent;
+    box-shadow: 0 0 2 1 $accent 40%;
+}
+
+.search-input {
+    margin-bottom: 1;
+    border: solid $secondary;
+    background: $surface;
+    padding: 0 1;
+}
+
+.search-input:focus {
+    border: thick $accent;
+    background: $panel;
+    box-shadow: 0 0 3 1 $accent 40%;
+}
+
+.search-options {
+    margin-bottom: 1;
+    layout: horizontal;
+}
+
+.search-options Checkbox {
+    margin: 0 1;
+    background: transparent;
+}
+
+.search-options Checkbox:hover {
+    background: $primary 10%;
+    border-radius: 1;
+}
+
+/* Filter actions */
+FilterActions {
+    height: auto;
+    padding: 1;
+    layout: horizontal;
+}
+
+.action-button {
+    margin: 0 1;
+    background: $secondary;
+    color: $text;
+    border: round $secondary;
+    padding: 1 2;
+    text-style: bold;
+    transition: all 0.2s ease;
+}
+
+.action-button:hover {
+    background: $primary;
+    border: round $primary;
+    box-shadow: 0 1 2 0 $primary 30%;
+}
+
+.action-button.-primary {
+    background: $accent;
+    border: round $accent;
+    color: $text;
+}
+
+.action-button.-primary:hover {
+    background: $accent-lighten-1;
+    border: round $accent-lighten-1;
+    box-shadow: 0 2 4 1 $accent 40%;
+}
+
+/* Filter summary */
+FilterSummary {
+    height: 3;
+    padding: 1;
+    border: round $primary;
+    background: $primary 10%;
+    margin-bottom: 1;
+}
+
+.summary-title {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 0;
+}
+
+.summary-text {
+    color: $text;
+    text-style: italic;
+    background: transparent;
+}
+
+/* Filter state indicators */
+.filter-active {
+    border-left: thick $success;
+    background: $success 5%;
+}
+
+.filter-inactive {
+    border-left: thick $secondary;
+    background: $surface;
+}
+
+.filter-modified {
+    border-left: thick $warning;
+    background: $warning 5%;
+}
+
+/* ================================
+   ADVANCED INTERACTIVE ELEMENTS
+   ================================ */
+
+/* Enhanced scrollbars */
+ScrollView {
+    scrollbar-size: 1 1;
+    scrollbar-background: $panel;
+    scrollbar-color: $secondary;
+    scrollbar-color-hover: $primary;
+    scrollbar-color-active: $accent;
+    scrollbar-corner-color: $surface;
+}
+
+/* Tooltip styling */
+.tooltip {
+    background: $panel;
+    color: $text;
+    border: solid $primary;
+    border-radius: 1;
+    padding: 0 1;
+    box-shadow: 0 2 4 1 $primary 30%;
+    text-style: italic;
+}
+
+/* Modal and overlay styling */
+.modal-overlay {
+    background: $surface 90%;
+}
+
+.modal-content {
+    background: $panel;
+    border: thick $primary;
+    border-radius: 2;
+    box-shadow: 0 6 12 3 $primary 40%;
+    animation: bounce-in 0.4s ease-out;
+}
+
+/* Tab styling */
+.tab {
+    background: $surface;
+    border: solid $secondary;
+    padding: 0 2;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    background: $primary 10%;
+    border: solid $primary 60%;
+}
+
+.tab-active {
+    background: $primary 20%;
+    border: thick $primary;
+    color: $text;
+    text-style: bold;
+    box-shadow: 0 0 3 1 $primary 40%;
+}
+
+/* Professional toggle switches */
+.toggle {
+    background: $secondary;
+    border: round $secondary;
+    transition: all 0.3s ease;
+}
+
+.toggle-on {
+    background: $success;
+    border: round $success;
+    box-shadow: 0 0 3 1 $success 50%;
+}
+
+.toggle:hover {
+    box-shadow: 0 1 2 0 $primary 30%;
+}
+
+/* Badge styling */
+.badge {
+    background: $primary;
+    color: $text;
+    border-radius: 1;
+    padding: 0 1;
+    text-style: bold;
+    box-shadow: 0 1 2 0 $primary 30%;
+}
+
+.badge-success {
+    background: $success;
+    box-shadow: 0 1 2 0 $success 30%;
+}
+
+.badge-warning {
+    background: $warning;
+    box-shadow: 0 1 2 0 $warning 30%;
+}
+
+.badge-error {
+    background: $error;
+    box-shadow: 0 1 2 0 $error 30%;
+}

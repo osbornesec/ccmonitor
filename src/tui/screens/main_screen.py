@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, ClassVar
 
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
+from textual.containers import Vertical
 from textual.screen import Screen
 
 from src.tui.screens.help_screen import HelpOverlay
@@ -15,11 +16,15 @@ from src.tui.utils.focus import (
     create_panel_focus_group,
     focus_manager,
 )
-from src.tui.utils.responsive import ScreenSize, responsive_manager
+from src.tui.utils.responsive import (
+    ResponsiveManager,
+    ScreenSize,
+    initialize_responsive_manager,
+)
 from src.tui.widgets.footer import CCMonitorFooter
 from src.tui.widgets.header import CCMonitorHeader
-from src.tui.widgets.live_feed_panel import LiveFeedPanel
-from src.tui.widgets.projects_panel import ProjectsPanel
+from src.tui.widgets.project_dashboard import OpenProjectTab, ProjectDashboard
+from src.tui.widgets.project_tabs import ProjectTabManager
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -35,6 +40,12 @@ LARGE_TERMINAL_WIDTH = 150
 
 class MainScreen(Screen[None]):
     """Main application screen with responsive three-panel layout."""
+
+    def __init__(self) -> None:
+        """Initialize main screen."""
+        super().__init__()
+        self.responsive_manager: ResponsiveManager | None = None
+        self.tab_manager: ProjectTabManager | None = None
 
     DEFAULT_CSS = """
     MainScreen {
@@ -102,15 +113,13 @@ class MainScreen(Screen[None]):
         """Compose the main screen layout with enhanced animations."""
         with Vertical(id="main-container", classes="fade-in"):
             yield CCMonitorHeader()
-            with Horizontal(id="content-area"):
-                yield ProjectsPanel(
-                    id="projects-panel",
-                    classes="slide-in-left",
-                )
-                yield LiveFeedPanel(
-                    id="live-feed-panel",
-                    classes="slide-in-right",
-                )
+            # Create a horizontal split for dashboard and tabs
+            with Vertical(id="content-area"):
+                # Project dashboard on the left/top
+                yield ProjectDashboard(widget_id="project-dashboard")
+                # Tab manager for individual project views
+                self.tab_manager = ProjectTabManager(widget_id="tab-manager")
+                yield self.tab_manager
             yield CCMonitorFooter()
 
     def on_mount(self) -> None:
@@ -176,13 +185,15 @@ class MainScreen(Screen[None]):
 
     def _setup_responsive_behavior(self) -> None:
         """Configure responsive layout behavior."""
-        # Configure responsive breakpoints for the projects panel
-        # Note: Configuration could be added here if needed
+        # Initialize responsive manager with app reference
+        self.responsive_manager = initialize_responsive_manager(self.app)
 
         # Trigger initial responsive layout
-        width, height = self.size
-        if width > 0 and height > 0:
-            responsive_manager.handle_resize(width, height)
+        if self.responsive_manager:
+            # Store the task to prevent it from being garbage collected
+            self._initial_resize_task = asyncio.create_task(
+                self.responsive_manager.handle_resize(self.size),
+            )
 
     def action_focus_projects_panel(self) -> None:
         """Focus the projects panel."""
@@ -361,26 +372,32 @@ class MainScreen(Screen[None]):
 
     async def on_resize(self, event: Resize) -> None:
         """Handle terminal resize events with responsive behavior."""
-        width, height = event.size
-
-        # Minimum size warnings
-        if width < MIN_TERMINAL_WIDTH or height < MIN_TERMINAL_HEIGHT:
-            min_size = f"{MIN_TERMINAL_WIDTH}x{MIN_TERMINAL_HEIGHT}"
-            self.notify(
-                f"Terminal size: {width}x{height} (min: {min_size})",
-                severity="warning",
-            )
+        if not self.responsive_manager:
+            return
 
         # Update responsive manager with new size
-        responsive_manager.handle_resize(width, height)
+        await self.responsive_manager.handle_resize(event.size)
 
         # Get current screen size category for adaptive behavior
-        current_screen_size = responsive_manager.breakpoints.get_screen_size(
-            width,
-        )
+        size_category = self.responsive_manager.get_size_category(event.size)
+        screen_size = self._category_to_screen_size(size_category)
 
         # Apply responsive layout changes
-        await self._apply_responsive_layout(current_screen_size, width, height)
+        await self._apply_responsive_layout(
+            screen_size,
+            event.size.width,
+            event.size.height,
+        )
+
+    def _category_to_screen_size(self, category: str) -> ScreenSize:
+        """Convert size category string to ScreenSize enum."""
+        return {
+            "tiny": ScreenSize.TINY,
+            "small": ScreenSize.SMALL,
+            "medium": ScreenSize.MEDIUM,
+            "large": ScreenSize.LARGE,
+            "xlarge": ScreenSize.XLARGE,
+        }.get(category, ScreenSize.MEDIUM)
 
     async def _apply_responsive_layout(
         self,
@@ -389,12 +406,15 @@ class MainScreen(Screen[None]):
         height: int,
     ) -> None:
         """Apply responsive layout changes based on screen size."""
+        if not self.responsive_manager:
+            return
+
         try:
             content_area = self.query_one("#content-area")
             projects_panel = self.query_one("#projects-panel")
             live_feed_panel = self.query_one("#live-feed-panel")
 
-            if responsive_manager.should_stack_vertically(screen_size):
+            if self.responsive_manager.should_stack_vertically():
                 self._apply_vertical_layout(
                     screen_size,
                     projects_panel,
@@ -418,6 +438,14 @@ class MainScreen(Screen[None]):
         """Clean up when screen is unmounted."""
         # Clear focus manager state
         focus_manager.clear_all()
+
+    def on_open_project_tab(self, message: OpenProjectTab) -> None:
+        """Handle request to open a project tab."""
+        if self.tab_manager:
+            self.tab_manager.open_project_tab(
+                message.path,
+                message.name,
+            )
 
     def _apply_vertical_layout(
         self,
