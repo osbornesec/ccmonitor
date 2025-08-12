@@ -222,7 +222,9 @@ class TestFocusGroup:
         widget1 = FocusableWidget("widget1", "Widget 1")
         widget2 = FocusableWidget("widget2", "Widget 2")
         group = FocusGroup(
-            TEST_GROUP_NAME, [widget1, widget2], wrap_around=False,
+            TEST_GROUP_NAME,
+            [widget1, widget2],
+            wrap_around=False,
         )
 
         # Next after widget1 should be widget2
@@ -253,7 +255,9 @@ class TestFocusGroup:
         widget1 = FocusableWidget("widget1", "Widget 1")
         widget2 = FocusableWidget("widget2", "Widget 2")
         group = FocusGroup(
-            TEST_GROUP_NAME, [widget1, widget2], wrap_around=False,
+            TEST_GROUP_NAME,
+            [widget1, widget2],
+            wrap_around=False,
         )
 
         # Previous before widget2 should be widget1
@@ -296,10 +300,14 @@ class TestFocusManager:
         """Test registering focusable widgets."""
         manager = FocusManager()
         widget1 = FocusableWidget(
-            "widget1", "Widget 1", focus_priority=PROJECTS_PRIORITY,
+            "widget1",
+            "Widget 1",
+            focus_priority=PROJECTS_PRIORITY,
         )
         widget2 = FocusableWidget(
-            "widget2", "Widget 2", focus_priority=FEED_PRIORITY,
+            "widget2",
+            "Widget 2",
+            focus_priority=FEED_PRIORITY,
         )
 
         # Register widgets to same group
@@ -309,7 +317,8 @@ class TestFocusManager:
         # Group should be created automatically
         assert TEST_GROUP_NAME in manager.focus_groups
         group = manager.focus_groups[TEST_GROUP_NAME]
-        assert len(group.widgets) == 2
+        expected_widget_count = 2
+        assert len(group.widgets) == expected_widget_count
 
         # Widgets should be sorted by priority (highest first)
         assert group.widgets[0].widget_id == "widget1"  # Higher priority
@@ -357,7 +366,8 @@ class TestFocusManager:
 
         # Get all widgets
         all_widgets = manager.get_focusable_widgets()
-        assert len(all_widgets) == 2
+        expected_total_widgets = 2
+        assert len(all_widgets) == expected_total_widgets
 
         # Get widgets from specific group
         group1_widgets = manager.get_focusable_widgets("group1")
@@ -372,10 +382,14 @@ class TestFocusManager:
         """Test focusing first available widget."""
         manager = FocusManager()
         widget1 = FocusableWidget(
-            "widget1", "Widget 1", focus_priority=TEST_PRIORITY,
+            "widget1",
+            "Widget 1",
+            focus_priority=TEST_PRIORITY,
         )
         widget2 = FocusableWidget(
-            "widget2", "Widget 2", focus_priority=PROJECTS_PRIORITY,
+            "widget2",
+            "Widget 2",
+            focus_priority=PROJECTS_PRIORITY,
         )
 
         manager.register_focusable(TEST_GROUP_NAME, widget1)
@@ -398,10 +412,14 @@ class TestFocusManager:
         """Test focusing last available widget."""
         manager = FocusManager()
         widget1 = FocusableWidget(
-            "widget1", "Widget 1", focus_priority=TEST_PRIORITY,
+            "widget1",
+            "Widget 1",
+            focus_priority=TEST_PRIORITY,
         )
         widget2 = FocusableWidget(
-            "widget2", "Widget 2", focus_priority=PROJECTS_PRIORITY,
+            "widget2",
+            "Widget 2",
+            focus_priority=PROJECTS_PRIORITY,
         )
 
         manager.register_focusable(TEST_GROUP_NAME, widget1)
@@ -543,10 +561,14 @@ class TestFocusManager:
         """Test getting keyboard shortcuts mapping."""
         manager = FocusManager()
         widget1 = FocusableWidget(
-            "widget1", "Widget 1", keyboard_shortcuts=["ctrl+1"],
+            "widget1",
+            "Widget 1",
+            keyboard_shortcuts=["ctrl+1"],
         )
         widget2 = FocusableWidget(
-            "widget2", "Widget 2", keyboard_shortcuts=["ctrl+2", "alt+2"],
+            "widget2",
+            "Widget 2",
+            keyboard_shortcuts=["ctrl+2", "alt+2"],
         )
 
         manager.register_focusable(TEST_GROUP_NAME, widget1)
@@ -568,15 +590,16 @@ class TestFocusManager:
         manager.register_focusable(TEST_GROUP_NAME, widget2)
 
         # Add observer
-        manager.add_focus_observer(observer)  # type: ignore[arg-type]
+        manager.add_focus_observer(observer)
         assert observer in manager.focus_observers
 
-        # Focus changes should notify observers (though our mock doesn't have on_focus_changed)
+        # Focus changes should notify observers
+        # (though our mock doesn't have on_focus_changed)
         manager.set_focus("widget1")
         manager.set_focus("widget2")
 
         # Remove observer
-        manager.remove_focus_observer(observer)  # type: ignore[arg-type]
+        manager.remove_focus_observer(observer)
         assert observer not in manager.focus_observers
 
     def test_clear_all(self) -> None:
@@ -612,10 +635,14 @@ class TestFocusMovement:
         """Test moving to first and last widgets."""
         manager = FocusManager()
         widget1 = FocusableWidget(
-            "widget1", "Widget 1", focus_priority=PROJECTS_PRIORITY,
+            "widget1",
+            "Widget 1",
+            focus_priority=PROJECTS_PRIORITY,
         )
         widget2 = FocusableWidget(
-            "widget2", "Widget 2", focus_priority=TEST_PRIORITY,
+            "widget2",
+            "Widget 2",
+            focus_priority=TEST_PRIORITY,
         )
 
         manager.register_focusable(TEST_GROUP_NAME, widget1)
@@ -713,7 +740,9 @@ class TestEdgeCases:
         """Test handling unfocusable widgets."""
         manager = FocusManager()
         widget = FocusableWidget(
-            TEST_WIDGET_ID, "Test Widget", can_focus=False,
+            TEST_WIDGET_ID,
+            "Test Widget",
+            can_focus=False,
         )
         manager.register_focusable(TEST_GROUP_NAME, widget)
 
@@ -768,7 +797,9 @@ class TestEdgeCases:
 
         class FailingObserver:
             def on_focus_changed(
-                self, old_focus: str | None, new_focus: str,
+                self,
+                _old_focus: str | None,
+                _new_focus: str,
             ) -> None:
                 msg = "Observer failed"
                 raise RuntimeError(msg)

@@ -228,7 +228,7 @@ class TestResponsiveManager:
         """Test responsive manager default initialization."""
         manager = ResponsiveManager()
         assert isinstance(manager.breakpoints, ResponsiveBreakpoints)
-        assert manager.current_size == ScreenSize.MEDIUM
+        assert manager.current_screen_size is None
         assert len(manager.registered_widgets) == 0
         assert len(manager.layout_configs) == 0
 
@@ -264,13 +264,13 @@ class TestResponsiveManager:
         manager.register_widget(widget)
 
         # Start with medium screen
-        manager.handle_resize(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
-        assert manager.current_size == ScreenSize.MEDIUM
+        manager.handle_resize_sync(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
+        assert manager.current_screen_size == ScreenSize.MEDIUM
         assert widget.update_count == 1
 
         # Resize within same category
-        manager.handle_resize(TEST_RESIZE_WIDTH, TEST_RESIZE_HEIGHT)
-        assert manager.current_size == ScreenSize.MEDIUM
+        manager.handle_resize_sync(TEST_RESIZE_WIDTH, TEST_RESIZE_HEIGHT)
+        assert manager.current_screen_size == ScreenSize.MEDIUM
         assert widget.update_count == 1  # Should not update again
 
     def test_resize_handling_with_change(self) -> None:
@@ -280,15 +280,15 @@ class TestResponsiveManager:
         manager.register_widget(widget)
 
         # Start with medium screen
-        manager.handle_resize(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
-        assert manager.current_size == ScreenSize.MEDIUM
+        manager.handle_resize_sync(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
+        assert manager.current_screen_size == ScreenSize.MEDIUM
         assert widget.last_size == ScreenSize.MEDIUM
         assert widget.update_count == 1
 
         # Change to large screen
-        manager.handle_resize(TEST_LARGE_WIDTH, TEST_LARGE_HEIGHT)
+        manager.handle_resize_sync(TEST_LARGE_WIDTH, TEST_LARGE_HEIGHT)
         # Manager should now be in large screen size
-        assert manager.current_size == ScreenSize.LARGE  # type: ignore[comparison-overlap]
+        assert manager.current_screen_size == ScreenSize.LARGE  # type: ignore[comparison-overlap]
         assert widget.last_size == ScreenSize.LARGE
         assert widget.last_width == TEST_LARGE_WIDTH
         assert widget.last_height == TEST_LARGE_HEIGHT
@@ -315,7 +315,7 @@ class TestResponsiveManager:
         manager.register_widget(working_widget)
 
         # This should not raise an exception
-        manager.handle_resize(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
+        manager.handle_resize_sync(TEST_MEDIUM_WIDTH, TEST_MEDIUM_HEIGHT)
 
         # Working widget should still be updated
         assert working_widget.update_count == 1
@@ -435,9 +435,9 @@ class TestEdgeCases:
         negative_height = -5
 
         # Should not crash with negative dimensions
-        manager.handle_resize(negative_width, negative_height)
+        manager.handle_resize_sync(negative_width, negative_height)
         # Still should be tiny (smallest category)
-        assert manager.current_size == ScreenSize.TINY
+        assert manager.current_screen_size == ScreenSize.TINY
 
     def test_very_large_dimensions(self) -> None:
         """Test handling of very large dimensions."""
@@ -452,8 +452,8 @@ class TestEdgeCases:
         manager = ResponsiveManager()
 
         # Should not crash with no widgets
-        manager.handle_resize(TEST_RESIZE_WIDTH, TEST_RESIZE_HEIGHT)
-        assert manager.current_size == ScreenSize.MEDIUM
+        manager.handle_resize_sync(TEST_RESIZE_WIDTH, TEST_RESIZE_HEIGHT)
+        assert manager.current_screen_size == ScreenSize.MEDIUM
 
     def test_config_with_none_values(self) -> None:
         """Test layout config with None values."""

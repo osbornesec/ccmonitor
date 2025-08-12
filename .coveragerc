@@ -1,0 +1,17 @@
+[run]
+source = src/tui
+omit = 
+    */tests/*
+    */conftest.py
+    */__init__.py
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

@@ -6,6 +6,9 @@
       "mcp__context7__get-library-docs",
       "mcp__perplexity__deep_research"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/home/michael/.claude/projects/"
+    ]
   }
 }

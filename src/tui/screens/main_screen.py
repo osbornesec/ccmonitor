@@ -25,6 +25,7 @@ from src.tui.widgets.footer import CCMonitorFooter
 from src.tui.widgets.header import CCMonitorHeader
 from src.tui.widgets.project_dashboard import OpenProjectTab, ProjectDashboard
 from src.tui.widgets.project_tabs import ProjectTabManager
+from src.tui.widgets.statistics_dashboard import StatisticsDashboard
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -46,6 +47,7 @@ class MainScreen(Screen[None]):
         super().__init__()
         self.responsive_manager: ResponsiveManager | None = None
         self.tab_manager: ProjectTabManager | None = None
+        self.statistics_dashboard: StatisticsDashboard | None = None
 
     DEFAULT_CSS = """
     MainScreen {
@@ -107,6 +109,8 @@ class MainScreen(Screen[None]):
         Binding("?", "show_help", "Show Help", show=False),
         Binding("ctrl+r", "refresh_view", "Refresh"),
         Binding("f5", "refresh_view", "Refresh", show=False),
+        Binding("ctrl+s", "show_statistics", "Statistics Dashboard"),
+        Binding("f3", "show_statistics", "Statistics Dashboard", show=False),
     ]
 
     def compose(self) -> ComposeResult:
@@ -235,6 +239,27 @@ class MainScreen(Screen[None]):
         # Show the enhanced help overlay
         help_screen = HelpOverlay()
         self.app.push_screen(help_screen)
+
+    def action_show_statistics(self) -> None:
+        """Show statistics dashboard overlay."""
+        if not self.statistics_dashboard:
+            self.statistics_dashboard = StatisticsDashboard(
+                widget_id="statistics-dashboard",
+            )
+            # Get data from project dashboard and update statistics
+            try:
+                project_dashboard = self.query_one(
+                    "#project-dashboard", ProjectDashboard,
+                )
+                if hasattr(project_dashboard, "all_entries"):
+                    self.statistics_dashboard.update_data(
+                        project_dashboard.all_entries,
+                    )
+            except ValueError:
+                self.log("Project dashboard not found for statistics update")
+
+        # Show statistics dashboard as a modal overlay
+        self.app.push_screen(self.statistics_dashboard)
 
     def action_focus_next_panel(self) -> None:
         """Move focus to next panel using focus manager."""

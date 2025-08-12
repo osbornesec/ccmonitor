@@ -14,7 +14,7 @@ from typing import TextIO
 try:
     import click
 except ImportError:
-    click = None
+    click = None  # type: ignore[assignment]
 
 from .constants import (
     BYTES_PER_KILOBYTE,
@@ -68,7 +68,9 @@ def format_size(size_bytes: int) -> str:
     size_index = 0
     size_value = float(size_bytes)
 
-    while size_value >= BYTES_PER_KILOBYTE and size_index < len(size_names) - 1:
+    while (
+        size_value >= BYTES_PER_KILOBYTE and size_index < len(size_names) - 1
+    ):
         size_value /= BYTES_PER_KILOBYTE
         size_index += 1
 
@@ -192,7 +194,11 @@ def safe_filename(filename: str) -> str:
     return result
 
 
-def confirm_destructive_operation(message: str, *, default: bool = False) -> bool:
+def confirm_destructive_operation(
+    message: str,
+    *,
+    default: bool = False,
+) -> bool:
     """Prompt user for confirmation of potentially destructive operations.
 
     Args:
@@ -204,7 +210,7 @@ def confirm_destructive_operation(message: str, *, default: bool = False) -> boo
 
     """
     if click is not None:
-        return click.confirm(message, default=default)  # type: ignore[no-any-return]
+        return bool(click.confirm(message, default=default))
 
     # Fallback for environments without click
     suffix = " (Y/n): " if default else " (y/N): "
@@ -370,3 +376,65 @@ def _is_valid_json_line(line: str) -> bool:
         return False
     else:
         return True
+
+
+class ModeDetector:
+    """Detect and manage UI mode selection."""
+
+    # Terminal size constants
+    MIN_TERMINAL_WIDTH = 80
+    MIN_TERMINAL_HEIGHT = 24
+
+    @staticmethod
+    def should_use_tui() -> bool:
+        """Determine if TUI should be used by default."""
+        return (
+            ModeDetector._is_terminal_available()
+            and ModeDetector._is_tui_enabled()
+            and ModeDetector._has_terminal_capabilities()
+        )
+
+    @staticmethod
+    def _is_terminal_available() -> bool:
+        """Check if running in a terminal with TTY support."""
+        return sys.stdout.isatty() and sys.stdin.isatty()
+
+    @staticmethod
+    def _is_tui_enabled() -> bool:
+        """Check if TUI is enabled (not explicitly disabled or in CI)."""
+        if os.environ.get("CCMONITOR_NO_TUI"):
+            return False
+        return not (
+            os.environ.get("CI") or os.environ.get("CONTINUOUS_INTEGRATION")
+        )
+
+    @staticmethod
+    def _has_terminal_capabilities() -> bool:
+        """Check if terminal has necessary capabilities."""
+        term = os.environ.get("TERM", "")
+        return not (term == "dumb" or not term)
+
+    @staticmethod
+    def can_use_tui() -> tuple[bool, str | None]:
+        """Check if TUI can be used in current environment."""
+        try:
+            # Check terminal
+            if not sys.stdout.isatty():
+                return False, "Not running in a terminal"
+
+            # Check size
+            cols, rows = get_terminal_size()
+            if (
+                cols < ModeDetector.MIN_TERMINAL_WIDTH
+                or rows < ModeDetector.MIN_TERMINAL_HEIGHT
+            ):
+                min_w = ModeDetector.MIN_TERMINAL_WIDTH
+                min_h = ModeDetector.MIN_TERMINAL_HEIGHT
+                return (
+                    False,
+                    f"Terminal too small ({cols}x{rows}). Minimum: {min_w}x{min_h}",
+                )
+        except OSError as e:
+            return False, f"Terminal error: {e}"
+        else:
+            return True, None

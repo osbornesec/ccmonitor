@@ -141,7 +141,8 @@ class JSONLEntry(BaseModel):
     parent_uuid: str | None = Field(None, alias="parentUuid")
     message: Message | None = None
     # Handle both dict and string toolUseResult
-    # Can be a ToolUseResult object, a string error, any dict from various tools, or a list
+    # Can be a ToolUseResult object, a string error, any dict from various tools,
+    # or a list
     tool_use_result: (
         ToolUseResult | str | dict[str, Any] | list[Any] | None
     ) = Field(
@@ -193,7 +194,7 @@ class JSONLEntry(BaseModel):
 
         if not isinstance(v, str):
             msg = "UUID must be a string or None"
-            raise ValueError(msg)
+            raise TypeError(msg)
 
         # Basic UUID format check (allow various formats)
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
@@ -301,15 +302,24 @@ class ParseResult(BaseModel):
         tool_counts: dict[str, int] = {}
 
         for entry in self.entries:
-            if entry.type in [MessageType.TOOL_CALL, MessageType.TOOL_USE]:
-                if entry.message and entry.message.tool:
-                    tool_name = entry.message.tool
-                    tool_counts[tool_name] = tool_counts.get(tool_name, 0) + 1
-            elif entry.tool_use_result:
-                # Handle both ToolUseResult objects and string errors
-                if isinstance(entry.tool_use_result, ToolUseResult):
-                    tool_name = entry.tool_use_result.tool_name
-                    tool_counts[tool_name] = tool_counts.get(tool_name, 0) + 1
-                # String tool_use_result indicates an error, skip counting
+            tool_name = self._extract_tool_name_from_entry(entry)
+            if tool_name:
+                tool_counts[tool_name] = tool_counts.get(tool_name, 0) + 1
 
         return tool_counts
+
+    def _extract_tool_name_from_entry(self, entry: JSONLEntry) -> str | None:
+        """Extract tool name from entry if available."""
+        # Check tool call entries
+        if entry.type in [MessageType.TOOL_CALL, MessageType.TOOL_USE]:
+            if entry.message and entry.message.tool:
+                return entry.message.tool
+
+        # Check tool result entries
+        elif entry.tool_use_result and isinstance(
+            entry.tool_use_result,
+            ToolUseResult,
+        ):
+            return entry.tool_use_result.tool_name
+
+        return None

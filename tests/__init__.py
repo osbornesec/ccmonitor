@@ -1,0 +1,1 @@
+"""CCMonitor test package."""

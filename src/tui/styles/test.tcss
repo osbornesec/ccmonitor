@@ -1,0 +1,36 @@
+/* Minimal CSS for testing - only basic styles that Textual supports */
+
+Screen {
+    background: $background;
+}
+
+Header {
+    height: 3;
+    background: $primary;
+    color: $text;
+}
+
+Footer {
+    height: 3;
+    background: $primary;
+    color: $text;
+}
+
+.panel {
+    border: solid $border;
+    padding: 1;
+    margin: 1;
+}
+
+.panel-title {
+    text-style: bold;
+    color: $accent;
+}
+
+Container {
+    height: 1fr;
+}
+
+Static {
+    height: auto;
+}

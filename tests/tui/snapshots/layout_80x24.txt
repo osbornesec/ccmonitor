@@ -1,0 +1,10 @@
+Terminal Size: 80x24
+Layout Type: compact
+Panel Width: 20 chars
+Remaining Width: 60 chars
+Usable Height: 21 lines (excluding header/footer)
+
+Responsive Features:
+- Sidebar: Visible
+- Help Text: Abbreviated
+- Status Bar: Icons only

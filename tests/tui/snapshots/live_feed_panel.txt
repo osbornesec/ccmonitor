@@ -1,0 +1,6 @@
+📨 Live Feed
+
+[10:23:45] 👤 User: Test message from user
+[10:24:46] 🤖 Assistant: Test response from assistant
+
+🔍 Filter messages (regex supported)...

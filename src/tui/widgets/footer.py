@@ -16,7 +16,6 @@ class CCMonitorFooter(Footer):
         dock: bottom;
         content-align: center middle;
         border-top: heavy $secondary;
-        box-shadow: 0 -1 3 0 $primary 30%;
     }
 
     CCMonitorFooter Key {
@@ -24,7 +23,6 @@ class CCMonitorFooter(Footer):
         color: $text;
         text-style: bold;
         padding: 0 1;
-        border-radius: 1;
         margin: 0 1;
     }
     """

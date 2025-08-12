@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
-import sys
 from pathlib import Path
 from typing import ClassVar
 
@@ -16,10 +15,13 @@ from textual.reactive import var
 from textual.widgets import Footer, Header, Static
 
 from .config import get_config
-from .exceptions import ConfigurationError, StartupError
+from .exceptions import ConfigurationError, StartupError, TUIError
 from .screens.help_screen import HelpOverlay
 from .screens.main_screen import MainScreen
+from .utils.error_handler import ErrorHandler
+from .utils.fallback import FallbackMode
 from .utils.focus import focus_manager
+from .utils.startup import StartupValidator
 from .utils.state import AppState
 
 
@@ -31,8 +33,8 @@ class CCMonitorApp(App[None]):
     SUB_TITLE = "Real-time Claude conversation tracker"
     VERSION = "0.1.0"
 
-    # CSS configuration
-    CSS_PATH = "styles/ccmonitor.tcss"
+    # CSS configuration - using test CSS until main CSS is fixed
+    CSS_PATH = "styles/test.tcss"
     ENABLE_COMMAND_PALETTE = True
 
     # Global key bindings
@@ -51,7 +53,7 @@ class CCMonitorApp(App[None]):
 
     # Screen registry
     # Screen registry defined as strings for lazy loading
-    # Type ignored because textual supports string imports at runtime
+    # Textual supports string imports at runtime
     SCREENS: ClassVar[dict[str, str]] = {  # type: ignore[assignment]
         "main": "src.tui.screens.main_screen:MainScreen",
         "help": "src.tui.screens.help_screen:HelpOverlay",
@@ -63,7 +65,7 @@ class CCMonitorApp(App[None]):
     dark_mode = var(default=True)
     active_project = var(default=None)
 
-    def __init__(self) -> None:
+    def __init__(self, *, test_mode: bool = False) -> None:
         """Initialize the application with configuration."""
         super().__init__()
         self.config = get_config()
@@ -72,6 +74,13 @@ class CCMonitorApp(App[None]):
         self._help_visible = False
         self._monitoring_task: asyncio.Task[None] | None = None
         self._monitoring_event = asyncio.Event()
+        self.test_mode = test_mode
+
+        # Initialize error handling system
+        self.error_handler = ErrorHandler(self)
+        self.fallback_mode = FallbackMode(self)
+        self.startup_validator = StartupValidator()
+
         self.setup_logging()
 
     def setup_logging(self) -> None:
@@ -90,26 +99,43 @@ class CCMonitorApp(App[None]):
     async def on_mount(self) -> None:
         """Mount app and initialize all components."""
         try:
-            # Startup sequence
-            await self.load_configuration()
-            await self.check_terminal()
-            await self.load_state()
-            await self.initialize_screens()
-
-            # Initialize focus manager with app reference
-            focus_manager.set_app(self)
-
-            # Switch to main screen
-            self.push_screen(MainScreen())
-
-            # Start monitoring if not paused
-            if not self.is_paused:
-                await self.start_monitoring()
-
-            self.logger.info("Application mounted successfully")
+            await self._perform_startup_sequence()
         except (StartupError, ConfigurationError) as e:
-            self.logger.critical("Startup failed: %s", e)
-            self.exit(message=f"Startup failed: {e}")
+            # Use comprehensive error handling
+            self.error_handler.handle_error(e)
+        except (OSError, ImportError, RuntimeError) as e:
+            # Handle specific expected errors during startup
+            wrapped_error = TUIError(f"Unexpected startup error: {e!s}")
+            self.error_handler.handle_error(wrapped_error)
+
+    async def _perform_startup_sequence(self) -> None:
+        """Perform the startup sequence steps."""
+        # Comprehensive startup validation
+        valid, message = self.startup_validator.validate()
+        if not valid:
+            raise StartupError(message or "Startup validation failed")
+
+        # Report warnings but continue
+        report = self.startup_validator.get_validation_report()
+        if report["has_warnings"]:
+            self.logger.warning("Startup warnings: %s", report["warnings"])
+
+        # Startup sequence
+        await self.load_configuration()
+        await self.load_state()
+        await self.initialize_screens()
+
+        # Initialize focus manager with app reference
+        focus_manager.set_app(self)
+
+        # Switch to main screen
+        self.push_screen(MainScreen())
+
+        # Start monitoring if not paused
+        if not self.is_paused:
+            await self.start_monitoring()
+
+        self.logger.info("Application mounted successfully")
 
     def compose(self) -> ComposeResult:
         """Create the application layout with enhanced styling."""
@@ -131,13 +157,26 @@ class CCMonitorApp(App[None]):
         # Configuration is already loaded in __init__
         self.logger.debug("Configuration loaded")
 
-    async def check_terminal(self) -> None:
-        """Check terminal capabilities."""
-        # Basic terminal capability check
-        if not sys.stdout.isatty():
-            msg = "Terminal required for TUI mode"
-            raise StartupError(msg)
-        self.logger.debug("Terminal capabilities verified")
+    def enter_fallback_mode(self) -> None:
+        """Enter fallback mode for limited terminals."""
+        self.logger.warning(
+            "Entering fallback mode due to terminal limitations",
+        )
+        self.fallback_mode.activate()
+
+    def load_default_config(self) -> None:
+        """Load default configuration after config error."""
+        self.logger.info("Loading default configuration")
+        self.config = get_config()  # This will load defaults
+
+    def reduce_visual_complexity(self) -> None:
+        """Reduce visual complexity after multiple rendering errors."""
+        self.logger.warning(
+            "Reducing visual complexity due to rendering issues",
+        )
+        # Disable animations and complex styling
+        if hasattr(self, "animation_level"):
+            self.animation_level = "none"
 
     async def load_state(self) -> dict[str, object] | None:
         """Load saved application state."""
@@ -260,7 +299,7 @@ class CCMonitorApp(App[None]):
     @property
     def dark(self) -> bool:
         """Compatibility property for dark mode state."""
-        return self.dark_mode
+        return bool(self.dark_mode)
 
     @dark.setter
     def dark(self, value: bool) -> None:

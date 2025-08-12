@@ -95,28 +95,49 @@ class FocusGroup:
                 return widget
         return None
 
-    def get_next_widget(self, current_id: str) -> FocusableWidget | None:
+    def get_next_widget(
+        self, current_id: str, *, allow_wrap: bool = True,
+    ) -> FocusableWidget | None:
         """Get the next focusable widget in the group."""
-        try:
-            current_index = next(
-                i
-                for i, w in enumerate(self.widgets)
-                if w.widget_id == current_id
-            )
+        current_index = self._find_widget_index(current_id)
+        if current_index is None:
+            return None
 
-            # Find next focusable widget
-            for i in range(len(self.widgets)):
-                next_index = (current_index + i + 1) % len(self.widgets)
-                if not self.wrap_around and next_index <= current_index:
-                    break
+        return self._find_next_focusable_widget(
+            current_index, allow_wrap=allow_wrap,
+        )
 
-                next_widget = self.widgets[next_index]
-                if next_widget.can_focus:
-                    return next_widget
+    def _find_widget_index(self, widget_id: str) -> int | None:
+        """Find the index of a widget by ID."""
+        for i, widget in enumerate(self.widgets):
+            if widget.widget_id == widget_id:
+                return i
+        return None
 
-        except StopIteration:
-            pass
+    def _find_next_focusable_widget(
+        self, current_index: int, *, allow_wrap: bool = True,
+    ) -> FocusableWidget | None:
+        """Find the next focusable widget from the current index."""
+        # Try forward search first
+        next_widget = self._search_forward_from_index(current_index + 1)
+        if next_widget:
+            return next_widget
 
+        # Try wrap around search if enabled
+        if self.wrap_around and allow_wrap:
+            return self._search_forward_from_index(0, current_index)
+
+        return None
+
+    def _search_forward_from_index(
+        self, start_index: int, end_index: int | None = None,
+    ) -> FocusableWidget | None:
+        """Search for focusable widget from start_index to end_index."""
+        end = end_index if end_index is not None else len(self.widgets)
+        for i in range(start_index, end):
+            widget = self.widgets[i]
+            if widget.can_focus:
+                return widget
         return None
 
     def get_previous_widget(self, current_id: str) -> FocusableWidget | None:
@@ -270,7 +291,11 @@ class FocusManager:
             return None
 
         # Try to move within the same group first
-        next_widget = current_group.get_next_widget(self.current_focus)
+        # Disable wrap-around if cross-group navigation is allowed
+        allow_wrap = scope != FocusScope.ALL_PANELS
+        next_widget = current_group.get_next_widget(
+            self.current_focus, allow_wrap=allow_wrap,
+        )
         if next_widget:
             return self.set_focus(next_widget.widget_id)
 

@@ -1,11 +1,10 @@
 """Comprehensive tests for JSONL parser functionality."""
 
 import json
+import os
 import tempfile
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-
-import pytest
 
 from src.services.jsonl_parser import (
     JSONLParseError,
@@ -15,7 +14,7 @@ from src.services.jsonl_parser import (
     parse_jsonl_file,
     parse_multiple_jsonl_files,
 )
-from src.services.models import JSONLEntry, MessageType, ParseStatistics
+from src.services.models import MessageType, ParseStatistics
 
 
 class TestJSONLParser:
@@ -55,7 +54,7 @@ class TestJSONLParser:
                 "type": "user",
                 "timestamp": "2025-08-01T10:00:00Z",
                 "message": {"content": "Hello world"},
-            }
+            },
         )
 
         entry = parser._parse_line(line, 1)
@@ -100,7 +99,7 @@ class TestJSONLParser:
                 "type": "user",
                 "timestamp": "2025-08-01T10:00:00Z",
                 "message": {"content": "x" * 200},  # Very long content
-            }
+            },
         )
 
         entry = parser._parse_line(long_line, 1)
@@ -113,7 +112,7 @@ class TestJSONLParser:
         parser = JSONLParser()
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             # Valid line
             f.write(
@@ -123,14 +122,14 @@ class TestJSONLParser:
                         "type": "user",
                         "timestamp": "2025-08-01T10:00:00Z",
                         "message": {"content": "Hello"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             # Invalid JSON line
             f.write(
-                '{"uuid": "msg-002", "type": "user"}\n'
+                '{"uuid": "msg-002", "type": "user"}\n',
             )  # Missing required fields
 
             # Empty line
@@ -144,9 +143,9 @@ class TestJSONLParser:
                         "type": "assistant",
                         "timestamp": "2025-08-01T10:01:00Z",
                         "message": {"content": "Hi there!"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             temp_file = Path(f.name)
@@ -183,7 +182,7 @@ class TestJSONLParser:
         parser = JSONLParser(file_age_limit_hours=1)  # 1 hour limit
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             f.write(
                 json.dumps(
@@ -192,17 +191,17 @@ class TestJSONLParser:
                         "type": "user",
                         "timestamp": "2025-08-01T10:00:00Z",
                         "message": {"content": "Hello"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             temp_file = Path(f.name)
 
         try:
             # Modify file timestamp to be older than 1 hour
-            old_time = datetime.now() - timedelta(hours=2)
-            temp_file.touch(times=(old_time.timestamp(), old_time.timestamp()))
+            old_time = datetime.now(UTC) - timedelta(hours=2)
+            os.utime(temp_file, (old_time.timestamp(), old_time.timestamp()))
 
             result = parser.parse_file(temp_file)
 
@@ -222,7 +221,7 @@ class TestJSONLParser:
         parser = JSONLParser()
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             # Session 1 entries
             f.write(
@@ -233,9 +232,9 @@ class TestJSONLParser:
                         "sessionId": "session-1",
                         "timestamp": "2025-08-01T10:00:00Z",
                         "message": {"content": "Hello"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             f.write(
@@ -247,9 +246,9 @@ class TestJSONLParser:
                         "parentUuid": "msg-001",
                         "timestamp": "2025-08-01T10:00:30Z",
                         "message": {"content": "Hi there!"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             # Session 2 entries
@@ -261,9 +260,9 @@ class TestJSONLParser:
                         "sessionId": "session-2",
                         "timestamp": "2025-08-01T11:00:00Z",
                         "message": {"content": "Different session"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             temp_file = Path(f.name)
@@ -296,7 +295,7 @@ class TestJSONLParser:
         parser = JSONLParser()
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             # User message
             f.write(
@@ -306,9 +305,9 @@ class TestJSONLParser:
                         "type": "user",
                         "timestamp": "2025-08-01T10:00:00Z",
                         "message": {"content": "Hello"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             # Assistant message
@@ -319,9 +318,9 @@ class TestJSONLParser:
                         "type": "assistant",
                         "timestamp": "2025-08-01T10:00:30Z",
                         "message": {"content": "Hi!"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             # Tool call
@@ -332,12 +331,13 @@ class TestJSONLParser:
                         "type": "tool_call",
                         "timestamp": "2025-08-01T10:01:00Z",
                         "message": {
+                            "content": "",  # Required field that was missing
                             "tool": "Read",
                             "parameters": {"file_path": "test.txt"},
                         },
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             # Tool result
@@ -352,9 +352,9 @@ class TestJSONLParser:
                             "input": {},
                             "output": "content",
                         },
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             temp_file = Path(f.name)
@@ -379,7 +379,7 @@ class TestJSONLParser:
                 "uuid": "msg-001",
                 "type": "user",
                 "timestamp": "2025-08-01T10:00:00Z",
-            }
+            },
         )
 
         entry = parser._parse_line(line, 1)
@@ -397,7 +397,7 @@ class TestJSONLParser:
             # Create multiple temp files
             for i in range(3):
                 f = tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".jsonl", delete=False
+                    mode="w", suffix=".jsonl", delete=False,
                 )
                 f.write(
                     json.dumps(
@@ -406,9 +406,9 @@ class TestJSONLParser:
                             "type": "user",
                             "timestamp": f"2025-08-01T10:{i:02d}:00Z",
                             "message": {"content": f"Message {i}"},
-                        }
+                        },
                     )
-                    + "\n"
+                    + "\n",
                 )
                 f.close()
                 files.append(Path(f.name))
@@ -447,7 +447,7 @@ class TestStreamingJSONLParser:
                     "type": "user",
                     "timestamp": "2025-08-01T10:00:00Z",
                     "message": {"content": "Hello"},
-                }
+                },
             )
             + "\n"
             + json.dumps(
@@ -456,7 +456,7 @@ class TestStreamingJSONLParser:
                     "type": "assistant",
                     "timestamp": "2025-08-01T10:00:30Z",
                     "message": {"content": "Hi!"},
-                }
+                },
             )
             + "\n"
         )
@@ -478,7 +478,7 @@ class TestStreamingJSONLParser:
                     "type": "user",
                     "timestamp": "2025-08-01T10:00:00Z",
                     "message": {"content": "Hello"},
-                }
+                },
             )
             + "\n"
         )
@@ -505,7 +505,7 @@ class TestStreamingJSONLParser:
                 "type": "user",
                 "timestamp": "2025-08-01T10:00:00Z",
                 "message": {"content": "Hello"},
-            }
+            },
         )
 
         entries1 = list(parser.feed_data(data))
@@ -522,7 +522,7 @@ class TestConvenienceFunctions:
     def test_parse_jsonl_file_function(self) -> None:
         """Test parse_jsonl_file convenience function."""
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             f.write(
                 json.dumps(
@@ -531,9 +531,9 @@ class TestConvenienceFunctions:
                         "type": "user",
                         "timestamp": "2025-08-01T10:00:00Z",
                         "message": {"content": "Hello"},
-                    }
+                    },
                 )
-                + "\n"
+                + "\n",
             )
 
             temp_file = Path(f.name)
@@ -555,7 +555,7 @@ class TestConvenienceFunctions:
         try:
             for i in range(2):
                 f = tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".jsonl", delete=False
+                    mode="w", suffix=".jsonl", delete=False,
                 )
                 f.write(
                     json.dumps(
@@ -564,9 +564,9 @@ class TestConvenienceFunctions:
                             "type": "user",
                             "timestamp": f"2025-08-01T10:{i:02d}:00Z",
                             "message": {"content": f"Message {i}"},
-                        }
+                        },
                     )
-                    + "\n"
+                    + "\n",
                 )
                 f.close()
                 files.append(Path(f.name))
@@ -638,7 +638,7 @@ class TestEdgeCases:
 
         # Test with invalid UTF-8 bytes
         with tempfile.NamedTemporaryFile(
-            mode="wb", suffix=".jsonl", delete=False
+            mode="wb", suffix=".jsonl", delete=False,
         ) as f:
             f.write(b'{"uuid": "msg-001", "type": "user"}\n')
             f.write(b"\xff\xfe\x00\x00")  # Invalid UTF-8 sequence
@@ -662,7 +662,7 @@ class TestEdgeCases:
         parser = JSONLParser()
 
         with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".jsonl", delete=False
+            mode="w", suffix=".jsonl", delete=False,
         ) as f:
             # Generate 1000 entries
             for i in range(1000):
@@ -709,7 +709,7 @@ class TestEdgeCases:
                     "type": "user",
                     "timestamp": timestamp,
                     "message": {"content": "Hello"},
-                }
+                },
             )
 
             entry = parser._parse_line(line, i + 1)

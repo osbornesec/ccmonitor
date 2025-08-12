@@ -1,7 +1,6 @@
 """Main CLI interface for ccmonitor tool - Live conversation monitoring."""
 
 import json
-import logging
 import sys
 import time
 import traceback
@@ -28,7 +27,6 @@ from .constants import (
     DEFAULT_MONITOR_DIRECTORY,
     DEFAULT_OUTPUT_FILE,
 )
-from .utils import setup_logging
 
 # Initialize colorama for cross-platform colored output
 colorama.init()
@@ -75,8 +73,8 @@ class CLIContext:
 
     def __init__(self) -> None:
         """Initialize CLI context."""
-        self.verbose = False
-        self.config_file = None
+        self.verbose: bool = False
+        self.config_file: str | None = None
         self.config: dict[str, Any] = {}
 
 
@@ -132,10 +130,6 @@ def cli(
             err=True,
         )
         sys.exit(1)
-
-    # Setup logging
-    log_level = logging.DEBUG if verbose else logging.INFO
-    setup_logging(log_level)
 
     # If no command is provided, show help
     if click_ctx.invoked_subcommand is None:
@@ -469,7 +463,9 @@ class FileMonitor:
     def _save_state(self) -> None:
         """Save monitoring state."""
         state = {
-            "file_timestamps": {str(k): v for k, v in self.file_timestamps.items()},
+            "file_timestamps": {
+                str(k): v for k, v in self.file_timestamps.items()
+            },
             "file_sizes": {str(k): v for k, v in self.file_sizes.items()},
             "last_run": datetime.now(UTC).isoformat(),
         }
@@ -487,9 +483,12 @@ class FileMonitor:
                 with self.state_file.open() as f:
                     state = json.load(f)
                 timestamps = {
-                    Path(k): v for k, v in state.get("file_timestamps", {}).items()
+                    Path(k): v
+                    for k, v in state.get("file_timestamps", {}).items()
                 }
-                sizes = {Path(k): v for k, v in state.get("file_sizes", {}).items()}
+                sizes = {
+                    Path(k): v for k, v in state.get("file_sizes", {}).items()
+                }
                 return timestamps, sizes
         except (OSError, json.JSONDecodeError) as e:
             if self.verbose:
@@ -547,6 +546,22 @@ def _display_monitor_startup(
     else:
         click.echo("Mode: Real-time monitoring (only NEW changes)")
         click.echo("Press Ctrl+C to stop")
+
+
+@cli.command()
+@click.option(
+    "--theme",
+    type=click.Choice(["dark", "light", "monokai", "solarized"]),
+    help="TUI theme",
+)
+def tui(theme: str | None) -> None:
+    """Launch TUI interface with optional settings."""
+    click.echo("TUI support will be available in future versions.")
+    click.echo("Currently using CLI mode.")
+    if theme:
+        click.echo(
+            f"Note: Theme '{theme}' will be applied when TUI is available.",
+        )
 
 
 @cli.group()

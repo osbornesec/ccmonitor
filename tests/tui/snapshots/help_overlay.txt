@@ -1,0 +1,20 @@
+┌─ Help ───────────────────────────────────────────────────────────────────────┐
+│                          CCMonitor Help                                     │
+│                                                                              │
+│ Navigation:                                                                  │
+│   Tab             - Cycle through panels                                    │
+│   ↑/↓             - Navigate within lists                                   │
+│   Ctrl+1,2,3      - Direct focus to panels                                 │
+│                                                                              │
+│ Actions:                                                                     │
+│   Enter           - Open/Select item                                        │
+│   Space           - Toggle selection                                        │
+│   /               - Start search                                            │
+│                                                                              │
+│ Global:                                                                      │
+│   h               - Show/hide help                                          │
+│   q               - Quit application                                        │
+│   Esc             - Cancel/go back                                          │
+│                                                                              │
+│                         Press Esc to close                                  │
+└──────────────────────────────────────────────────────────────────────────────┘

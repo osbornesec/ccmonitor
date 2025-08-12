@@ -34,7 +34,7 @@ class TestCCMonitorApp:
             assert app.TITLE == "CCMonitor - Multi-Project Monitoring"
             assert app.SUB_TITLE == "Real-time Claude conversation tracker"
             assert app.VERSION == "0.1.0"
-            assert app.CSS_PATH == "styles/ccmonitor.tcss"
+            assert app.CSS_PATH == "styles/test.tcss"
 
     def test_key_bindings_registered(self) -> None:
         """Test all key bindings are properly registered."""

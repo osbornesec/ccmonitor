@@ -1,0 +1,12 @@
+┌─ Error ──────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ⚠️  Error occurred while loading conversation data                         │
+│                                                                              │
+│  Unable to parse JSONL file: /path/to/conversation.jsonl                   │
+│  Line 42: Invalid JSON syntax                                               │
+│                                                                              │
+│  The application will continue with cached data.                            │
+│                                                                              │
+│                        [ OK ] [ Retry ]                                     │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘

@@ -5,13 +5,38 @@ from unittest.mock import patch
 
 import pytest
 
+# Import all TUI modules that we want to test
+from src.tui import CCMonitorApp
+from src.tui.app import CCMonitorApp as AppClass
+from src.tui.config import TUIConfig, load_config
+from src.tui.exceptions import (
+    NavigationError,
+    RecoverableError,
+    RenderingError,
+    StartupError,
+    TerminalError,
+    TUIError,
+)
+from src.tui.screens import ErrorScreen, HelpOverlay, MainScreen
+from src.tui.utils import (
+    KeyBindingManager,
+    StartupValidator,
+    ThemeManager,
+    TransitionManager,
+)
+from src.tui.widgets import (
+    BaseWidget,
+    CCMonitorFooter,
+    CCMonitorHeader,
+    LoadingIndicator,
+)
+
+# Constants
+MIN_TERMINAL_WIDTH = 80
+
 
 def test_tui_package_imports() -> None:
     """Verify all TUI modules are importable."""
-    from src.tui import CCMonitorApp
-    from src.tui.config import TUIConfig
-    from src.tui.exceptions import StartupError, TUIError
-
     assert CCMonitorApp is not None
     assert TUIConfig is not None
     assert issubclass(StartupError, TUIError)
@@ -27,20 +52,13 @@ def test_css_file_exists() -> None:
 
     # Check for essential Textual CSS patterns
     assert "Screen {" in content, "Missing Screen root selector"
-    assert "$primary" in content or "$surface" in content, "Missing theme variables"
+    assert (
+        "$primary" in content or "$surface" in content
+    ), "Missing theme variables"
 
 
 def test_exception_hierarchy() -> None:
     """Verify exception classes are properly structured."""
-    from src.tui.exceptions import (
-        NavigationError,
-        RecoverableError,
-        RenderingError,
-        StartupError,
-        TerminalError,
-        TUIError,
-    )
-
     # Test inheritance hierarchy
     assert issubclass(StartupError, TUIError)
     assert issubclass(TerminalError, TUIError)
@@ -58,13 +76,11 @@ def test_exception_hierarchy() -> None:
 
 def test_configuration_system() -> None:
     """Test configuration loading and defaults."""
-    from src.tui.config import TUIConfig, load_config
-
     # Test default configuration
     config = TUIConfig()
     assert config.app_name == "CCMonitor"
     assert config.default_theme == "dark"
-    assert config.min_terminal_width == 80
+    assert config.min_terminal_width == MIN_TERMINAL_WIDTH
 
     # Test configuration loading with non-existent file
     config_loaded = load_config(Path("/non/existent/path"))
@@ -75,9 +91,7 @@ def test_configuration_system() -> None:
 async def test_app_basic_lifecycle() -> None:
     """Test basic App class lifecycle without full UI."""
     with patch("src.tui.app.logging"):
-        from src.tui.app import CCMonitorApp
-
-        app = CCMonitorApp()
+        app = AppClass()
         assert app.title is not None
         assert hasattr(app, "CSS_PATH")
 
@@ -107,27 +121,18 @@ def test_package_structure() -> None:
 
 def test_screen_classes() -> None:
     """Test screen classes are properly defined."""
-    from src.tui.screens import ErrorScreen, HelpScreen, MainScreen
-
     assert MainScreen is not None
-    assert HelpScreen is not None
+    assert HelpOverlay is not None
     assert ErrorScreen is not None
 
     # Test that they have required attributes
     assert hasattr(MainScreen, "BINDINGS")
-    assert hasattr(HelpScreen, "BINDINGS")
+    assert hasattr(HelpOverlay, "BINDINGS")
     assert hasattr(ErrorScreen, "BINDINGS")
 
 
 def test_widget_classes() -> None:
     """Test widget classes are properly defined."""
-    from src.tui.widgets import (
-        BaseWidget,
-        CCMonitorFooter,
-        CCMonitorHeader,
-        LoadingIndicator,
-    )
-
     assert BaseWidget is not None
     assert CCMonitorHeader is not None
     assert CCMonitorFooter is not None
@@ -136,13 +141,6 @@ def test_widget_classes() -> None:
 
 def test_utility_classes() -> None:
     """Test utility classes are properly defined."""
-    from src.tui.utils import (
-        KeyBindingManager,
-        StartupValidator,
-        ThemeManager,
-        TransitionManager,
-    )
-
     assert KeyBindingManager is not None
     assert ThemeManager is not None
     assert StartupValidator is not None

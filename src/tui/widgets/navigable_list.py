@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from textual.binding import Binding
 from textual.reactive import reactive
 from textual.widgets import ListView
 
 if TYPE_CHECKING:
+
     from textual.events import Key
+    from textual.widget import Widget
     from textual.widgets import ListItem
 
 # Constants for navigation
@@ -90,10 +92,28 @@ class NavigableList(ListView):
     cursor_index = reactive(0, layout=False, repaint=False)
     show_cursor = reactive(default=True, layout=False)
 
-    def __init__(self, *children: ListItem, **kwargs: object) -> None:
+    def __init__(
+        self,
+        *children: ListItem,
+        initial_index: int | None = 0,
+        name: str | None = None,
+        id: str | None = None,  # noqa: A002
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
         """Initialize NavigableList with cursor management."""
-        super().__init__(*children, **kwargs)
+        super().__init__(
+            *children,
+            initial_index=initial_index,
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
         self._cursor_visible = True
+        self._previous_cursor_index = (
+            -1
+        )  # Track previous cursor for O(1) updates
 
     def on_mount(self) -> None:
         """Set up initial state when widget is mounted."""
@@ -118,18 +138,27 @@ class NavigableList(ListView):
         self.scroll_to_cursor()
 
     def _update_cursor_display(self) -> None:
-        """Update visual cursor indicators on list items."""
+        """Update visual cursor indicators on list items with O(1) optimization."""
         if not self.show_cursor:
             return
 
-        # Remove cursor from all items
-        for child in self.children:
-            child.remove_class("cursor-active")
+        # O(1) optimization: Only update changed items
+        if (
+            hasattr(self, "_previous_cursor_index")
+            and self._previous_cursor_index != self.cursor_index
+            and 0 <= self._previous_cursor_index < len(self.children)
+        ):
+            # Remove cursor from previous item only
+            previous_item = self.children[self._previous_cursor_index]
+            previous_item.remove_class("cursor-active")
 
         # Add cursor to current item if valid
         if 0 <= self.cursor_index < len(self.children):
             current_item = self.children[self.cursor_index]
             current_item.add_class("cursor-active")
+
+        # Update tracking for next call
+        self._previous_cursor_index = self.cursor_index
 
     def action_cursor_up(self) -> None:
         """Move cursor up one item."""
@@ -177,7 +206,9 @@ class NavigableList(ListView):
             item.add_class("-highlighted")
 
             # Post selection event
-            self.post_message(self.Selected(self, item, self.cursor_index))
+            self.post_message(
+                self.Selected(self, cast("ListItem", item), self.cursor_index),
+            )
 
     def action_toggle_cursor(self) -> None:
         """Toggle selection state of item at cursor position."""
@@ -201,14 +232,13 @@ class NavigableList(ListView):
 
     def _can_scroll_to_cursor(self) -> bool:
         """Check if cursor can be scrolled to."""
-        return (
+        return bool(
             0 <= self.cursor_index < len(self.children)
-            and self.content_size.height > 0
+            and self.content_size.height > 0,
         )
 
-    def _calculate_scroll_target(self, cursor_item: object) -> int | None:
+    def _calculate_scroll_target(self, cursor_item: Widget) -> int | None:
         """Calculate target scroll position for cursor item."""
-        # Use type: ignore for accessing region attribute
         item_region = cursor_item.region
         container_height = self.content_size.height
 
@@ -224,9 +254,9 @@ class NavigableList(ListView):
         visible_bottom = current_scroll + container_height
 
         if item_region.y < visible_top + top_margin:
-            return int(desired_top)  # type: ignore[no-any-return]
+            return int(desired_top)
         if item_region.y + item_region.height > visible_bottom - bottom_margin:
-            return int(max(0, desired_bottom - container_height))  # type: ignore[no-any-return]
+            return int(max(0, desired_bottom - container_height))
 
         return None
 
@@ -234,11 +264,7 @@ class NavigableList(ListView):
         """Get the currently selected list item."""
         if 0 <= self.cursor_index < len(self.children):
             child = self.children[self.cursor_index]
-            if hasattr(child, "__class__") and hasattr(
-                child.__class__,
-                "__name__",
-            ):
-                return child  # type: ignore[return-value]
+            return cast("ListItem", child)
         return None
 
     def set_cursor_index(self, index: int, *, scroll: bool = True) -> None:
@@ -287,12 +313,12 @@ class NavigableList(ListView):
     def get_selected_items(self) -> list[ListItem]:
         """Get all currently selected items."""
         return [
-            child
-            for child in self.children  # type: ignore[misc]
+            cast("ListItem", child)
+            for child in self.children
             if child.has_class("-highlighted")
         ]
 
-    def on_key(self, event: Key) -> None:  # type: ignore[override]
+    def on_key(self, event: Key) -> None:
         """Handle additional key events not covered by bindings."""
         # Handle numeric keys for quick navigation
         if event.key.isdigit():
@@ -339,7 +365,10 @@ class NavigableList(ListView):
         # Insert the item (append for now as ListView API may be limited)
         self.append(item)
 
-    def focus(self, *, scroll_visible: bool = True) -> NavigableList:
+    def focus(
+        self,
+        scroll_visible: bool = True,  # noqa: FBT001, FBT002
+    ) -> NavigableList:
         """Override focus to ensure cursor is visible."""
         super().focus(scroll_visible=scroll_visible)
         self.show_cursor = True
@@ -352,3 +381,8 @@ class NavigableList(ListView):
         # Keep cursor visible but less prominent when not focused
         # Visual distinction is handled by CSS :focus selectors
         return self
+
+
+# Virtual scrolling implementation is reserved for future enhancement.
+# The O(1) cursor optimization above provides significant performance
+# improvement for current TUI rendering needs.

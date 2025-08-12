@@ -1,1 +1,1 @@
-# CLI tests package
+"""CLI tests package."""

@@ -17,7 +17,6 @@ class CCMonitorHeader(Header):
         text-style: bold;
         content-align: center middle;
         border-bottom: heavy $secondary;
-        box-shadow: 0 1 3 0 $primary 30%;
     }
     """
 

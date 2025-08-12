@@ -1,0 +1,12 @@
+Long Text Handling Test:
+
+Short line: Normal text
+Medium line: This is a medium length line that fits in most terminals
+Long line: This is a very long line that should demonstrate text wrapping behavior in the terminal user interface when the content exceeds the available width of the display area.
+
+Wrapped paragraphs:
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Code snippets:
+def very_long_function_name_that_might_cause_wrapping_issues(parameter_one, parameter_two, parameter_three):
+    return "This function has a very long signature that tests horizontal scrolling"

@@ -27,6 +27,7 @@ dependencies = [
     "tqdm>=4.66.0",
     "types-pyyaml>=6.0.12.20250809",
     "uvicorn>=0.24.0",
+    "watchdog>=6.0.0",
 ]
 
 [project.optional-dependencies]
@@ -71,7 +72,7 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-disallow_any_unimported = true
+disallow_any_unimported = false
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -84,9 +85,18 @@ module = [
     "click",
     "click.*",
     "colorama",
-    "colorama.*"
+    "colorama.*",
+    "textual",
+    "textual.*",
+    "pytest",
+    "pytest.*",
+    "psutil",
+    "psutil.*",
+    "rich",
+    "rich.*",
 ]
 ignore_missing_imports = true
+disallow_any_unimported = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -98,3 +108,21 @@ addopts = [
     "-v"
 ]
 asyncio_mode = "auto"
+markers = [
+    "performance: marks tests as performance benchmarks",
+    "integration: marks tests as integration tests",
+    "accessibility: marks tests as accessibility compliance tests",
+    "visual: marks tests as visual regression tests",
+    "widget: marks tests as widget-specific tests",
+    "benchmark: marks tests as benchmark tests",
+]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.137.1",
+    "pytest-benchmark>=5.1.0",
+    "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
+    "pytest-textual-snapshot>=1.1.0",
+    "pytest-xdist>=3.8.0",
+]

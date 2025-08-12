@@ -1,0 +1,10 @@
+Theme: Dark
+Background: black
+Foreground: white
+Accent: blue
+
+Visual Elements:
+- Primary text: white on black
+- Highlighted: blue on black
+- Borders: blue
+- Status indicators: Multi-color on black
