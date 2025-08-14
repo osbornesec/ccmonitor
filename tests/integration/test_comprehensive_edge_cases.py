@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from src.cli.main import FileMonitor, MonitorConfig
+from src.cli.handlers.file_handler import FileMonitor
+from src.cli.types import MonitorConfig
 from src.tui.app import CCMonitorApp
 
 if TYPE_CHECKING:
@@ -119,8 +120,8 @@ class TestEdgeCaseScenarios:
         # Should handle permission errors gracefully
         try:
             content = monitor._read_new_content(
-                protected_file, 0
-            )  # noqa: SLF001
+                protected_file, 0,
+            )
             # If no exception, should return empty list or error placeholders
             assert isinstance(content, list)
         except PermissionError:
@@ -279,7 +280,7 @@ class TestEdgeCaseScenarios:
 
         for filename in test_files:
             (temp_project_dir / filename).write_text(
-                f'{{"file": "{filename}"}}\n'
+                f'{{"file": "{filename}"}}\n',
             )
 
         # Test with different patterns
@@ -298,7 +299,7 @@ class TestEdgeCaseScenarios:
 
             # Should return some files for each pattern
             assert isinstance(
-                files, (list, set)
+                files, (list, set),
             )  # _scan_files might return set
             # Pattern matching should work without errors
 
@@ -355,7 +356,7 @@ class TestEdgeCaseScenarios:
 
         for file_path in test_files:
             (temp_project_dir / file_path).write_text(
-                f'{{"file": "{file_path}"}}\n'
+                f'{{"file": "{file_path}"}}\n',
             )
 
         config = MonitorConfig(

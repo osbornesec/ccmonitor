@@ -13,7 +13,8 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from src.cli.main import FileMonitor, MonitorConfig
+from src.cli.handlers.file_handler import FileMonitor
+from src.cli.types import MonitorConfig
 from src.tui.app import CCMonitorApp
 
 if TYPE_CHECKING:
