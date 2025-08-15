@@ -1,0 +1,437 @@
+name: Comprehensive Testing Suite
+
+on:
+  push:
+    branches: [main, develop, "feature/*"]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run nightly performance tests at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  PYTHON_VERSION: "3.11"
+  UV_VERSION: "0.5.0"
+
+jobs:
+  # Fast feedback jobs (< 5 minutes)
+  lint-and-format:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run ruff linting
+        run: uv run ruff check --output-format=github .
+        
+      - name: Run ruff formatting check
+        run: uv run ruff format --check .
+        
+      - name: Run mypy type checking
+        run: uv run mypy src/
+
+  # Core unit tests (< 10 minutes)
+  unit-tests:
+    name: Unit Tests
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12"]
+      fail-fast: false
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run unit tests
+        run: |
+          uv run pytest tests/core/ tests/utils/ tests/cli/ \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --junit-xml=test-results-unit.xml \
+            -v
+            
+      - name: Upload unit test coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          flags: unit-tests
+          name: unit-tests-${{ matrix.os }}-py${{ matrix.python-version }}
+          
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: test-results-unit.xml
+
+  # TUI and integration tests (< 15 minutes)
+  integration-tests:
+    name: Integration & TUI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run TUI tests with virtual display
+        run: |
+          xvfb-run -a uv run pytest tests/tui/ \
+            --cov=src/tui \
+            --cov-report=xml:coverage-tui.xml \
+            --cov-report=term-missing \
+            --junit-xml=test-results-tui.xml \
+            -v
+            
+      - name: Run integration tests
+        run: |
+          uv run pytest tests/integration/ \
+            --cov=src/services \
+            --cov-append \
+            --cov-report=xml:coverage-integration.xml \
+            --cov-report=term-missing \
+            --junit-xml=test-results-integration.xml \
+            -v
+            
+      - name: Upload TUI test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage-tui.xml
+          flags: tui-tests
+          name: tui-tests-ubuntu
+          
+      - name: Upload integration test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage-integration.xml
+          flags: integration-tests
+          name: integration-tests-ubuntu
+          
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            test-results-tui.xml
+            test-results-integration.xml
+
+  # Performance benchmarks (< 20 minutes)
+  performance-tests:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Only run on main branch, PRs to main, or scheduled runs
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run performance benchmarks
+        run: |
+          uv run pytest tests/performance/ \
+            --benchmark-only \
+            --benchmark-json=benchmark-results.json \
+            --benchmark-columns=min,max,mean,stddev,median,iqr \
+            --benchmark-sort=mean \
+            --benchmark-warmup=on \
+            -v
+            
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Python Benchmark
+          tool: 'pytest'
+          output-file-path: benchmark-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          comment-on-alert: true
+          alert-threshold: '150%'  # Alert if performance degrades by 150%
+          fail-on-alert: true
+          
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-results.json
+
+  # Accessibility compliance tests
+  accessibility-tests:
+    name: Accessibility Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run accessibility tests
+        run: |
+          xvfb-run -a uv run pytest tests/tui/accessibility/ \
+            --junit-xml=test-results-accessibility.xml \
+            -v -m accessibility
+            
+      - name: Upload accessibility test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-test-results
+          path: test-results-accessibility.xml
+
+  # Visual regression tests with snapshot updates
+  visual-regression:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run visual regression tests
+        run: |
+          xvfb-run -a uv run pytest tests/tui/visual/ \
+            --junit-xml=test-results-visual.xml \
+            -v -m visual
+            
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-test-results
+          path: test-results-visual.xml
+          
+      - name: Upload snapshot differences
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: snapshot-differences
+          path: tests/tui/snapshots/
+
+  # Comprehensive coverage report
+  coverage-report:
+    name: Coverage Report
+    needs: [unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run full test suite with coverage
+        run: |
+          uv run pytest \
+            --cov=src \
+            --cov-report=html \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-fail-under=95 \
+            --junit-xml=test-results-full.xml
+            
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          flags: full-suite
+          name: full-test-suite
+          
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: htmlcov/
+          
+      - name: Coverage comment
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MINIMUM_GREEN: 95
+          MINIMUM_ORANGE: 90
+
+  # Security and dependency scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+          
+      - name: Install dependencies
+        run: uv sync --dev
+        
+      - name: Run safety check
+        run: uv run safety check --json --output safety-report.json
+        continue-on-error: true
+        
+      - name: Run bandit security linter
+        run: uv run bandit -r src/ -f json -o bandit-report.json
+        continue-on-error: true
+        
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            safety-report.json
+            bandit-report.json
+
+  # Final status check
+  test-status:
+    name: Test Status
+    needs: [
+      lint-and-format,
+      unit-tests,
+      integration-tests,
+      accessibility-tests,
+      coverage-report
+    ]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Check test results
+        run: |
+          echo "Lint and format: ${{ needs.lint-and-format.result }}"
+          echo "Unit tests: ${{ needs.unit-tests.result }}"
+          echo "Integration tests: ${{ needs.integration-tests.result }}"
+          echo "Accessibility tests: ${{ needs.accessibility-tests.result }}"
+          echo "Coverage report: ${{ needs.coverage-report.result }}"
+          
+          if [[ "${{ needs.lint-and-format.result }}" == "failure" || 
+                "${{ needs.unit-tests.result }}" == "failure" || 
+                "${{ needs.integration-tests.result }}" == "failure" || 
+                "${{ needs.accessibility-tests.result }}" == "failure" || 
+                "${{ needs.coverage-report.result }}" == "failure" ]]; then
+            echo "❌ Some critical tests failed"
+            exit 1
+          else
+            echo "✅ All critical tests passed"
+          fi
